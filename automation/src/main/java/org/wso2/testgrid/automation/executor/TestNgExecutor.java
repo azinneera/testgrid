@@ -24,6 +24,7 @@ import org.testng.TestNG;
 import org.wso2.testgrid.automation.TestAutomationException;
 import org.wso2.testgrid.common.Deployment;
 import org.wso2.testgrid.common.TestScenario;
+import org.wso2.testgrid.common.util.StringUtil;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -70,7 +71,8 @@ public class TestNgExecutor extends TestExecutor {
                 URLClassLoader classLoader = new URLClassLoader(urls, ClassLoader.getSystemClassLoader());
                 Thread.currentThread().setContextClassLoader(classLoader);
             } catch (MalformedURLException e) {
-                String msg = "Error occurred while loading " + jarFile.getName() + " into classpath";
+                String msg = StringUtil.concatStrings("Error occurred while loading ",
+                        jarFile.getName(), " into classpath");
                 logger.error(msg, e);
             }
         }
