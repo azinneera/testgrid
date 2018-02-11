@@ -28,6 +28,7 @@ import org.kohsuke.args4j.spi.SubCommands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.testgrid.common.exception.CommandExecutionException;
+import org.wso2.testgrid.common.util.StringUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -88,7 +89,7 @@ public class CommandHandler extends HelpCommand {
                 return properties.getProperty("version");
             }
         } catch (IOException e) {
-            log.error("Unable determine version from JAR file: " + e.getMessage());
+            log.error(StringUtil.concatStrings("Unable determine version from JAR file: ", e.getMessage()));
         }
         return "NaN";
     }
@@ -103,14 +104,15 @@ public class CommandHandler extends HelpCommand {
 
         if (version) {
             final String ls = System.lineSeparator();
-            String versionBuilder = "WSO2 Deployment Monitor " + getVersion() + ls +
-                                    "Deployment Monitor Home: " +
-                                    System.getProperty("deployment.monitor.home", "<unknown>") + ls +
-                                    "Java version: " + System.getProperty("java.version", "<unknown>") + ls +
-                                    "Java home: " + System.getProperty("java.home", "<unknown>") + ls +
-                                    "OS name: \"" + SystemUtils.OS_NAME +
-                                    "\", version: \"" + SystemUtils.OS_VERSION +
-                                    "\", arch: \"" + SystemUtils.OS_ARCH + ls;
+            String versionBuilder = StringUtil.concatStrings(
+                            "WSO2 Deployment Monitor ", getVersion(), ls,
+                                    "Deployment Monitor Home: ",
+                                    System.getProperty("deployment.monitor.home", "<unknown>"), ls,
+                                    "Java version: ", System.getProperty("java.version", "<unknown>"), ls,
+                                    "Java home: ", System.getProperty("java.home", "<unknown>"), ls,
+                                    "OS name: \"", SystemUtils.OS_NAME,
+                                    "\", version: \"", SystemUtils.OS_VERSION,
+                                    "\", arch: \"", SystemUtils.OS_ARCH, ls);
 
             log.info(versionBuilder);
             return;

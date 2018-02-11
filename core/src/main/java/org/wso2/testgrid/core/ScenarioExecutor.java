@@ -69,13 +69,13 @@ public class ScenarioExecutor {
             testScenario.setStatus(Status.RUNNING);
             testScenario = persistTestScenario(testScenario);
 
-            logger.info("Executing Tests for Solution Pattern : " + testScenario.getName());
+            logger.info(StringUtil.concatStrings("Executing Tests for Solution Pattern : ", testScenario.getName()));
             String testLocation = Paths.get(homeDir, testScenario.getName()).toAbsolutePath().toString();
             List<Test> tests = getTests(testScenario, testLocation);
 
             if (tests.isEmpty()) {
-                logger.warn("Couldn't find any tests for the scenario " + testScenario + " At location "
-                            + testLocation);
+                logger.warn(StringUtil.concatStrings("Couldn't find any tests for the scenario ",
+                        testScenario, " at location ", testLocation));
             }
 
             for (Test test : tests) {
@@ -144,9 +144,9 @@ public class ScenarioExecutor {
                     }
                 }
             } else {
-                throw new ScenarioExecutorException(
-                        "Scenario directory doesn't exist for the path : " + testLocationPath + " Scenario name : "
-                        + testScenario.getName());
+                throw new ScenarioExecutorException(StringUtil.concatStrings(
+                        "Scenario directory doesn't exist for the path : ", testLocationPath,
+                        " Scenario name : ", testScenario.getName()));
             }
             return testList;
         } catch (TestAutomationException e) {

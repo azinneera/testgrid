@@ -92,8 +92,9 @@ public class RunTestPlanCommand implements Command {
     @Override
     public void execute() throws CommandExecutionException {
         try {
-            logger.debug("Input Arguments: \n" + "\tProduct name: " + productName);
-
+            if (logger.isDebugEnabled()) {
+                logger.debug(StringUtil.concatStrings("Input Arguments: \n\tProduct name: ", productName));
+            }
             // Get test plan YAML file path location
             Product product = getProduct(productName);
             Optional<String> testPlanYAMLFilePath = getTestPlanGenFilePath(product);
@@ -267,9 +268,9 @@ public class RunTestPlanCommand implements Command {
             Path testRunDirectory = TestGridUtil.getTestRunArtifactsDirectory(testPlan);
             return testRunDirectory.resolve(TestGridConstants.TEST_LOG_FILE_NAME).toString();
         } catch (TestGridException e) {
-            throw new TestGridLoggingException(
-                    "Error in getting the test run artifacts directory location " +
-                    "([PRODUCT_NAME_VERSION_CHANNEL]/[DEPLOYMENT_PATTERN_NAME]/[INFRA_PARAM_UUID]/[TEST_RUN_NUMBER]");
+            throw new TestGridLoggingException(StringUtil.concatStrings(
+                    "Error in getting the test run artifacts directory location ",
+                    "([PRODUCT_NAME_VERSION_CHANNEL]/[DEPLOYMENT_PATTERN_NAME]/[INFRA_PARAM_UUID]/[TEST_RUN_NUMBER]"));
         }
     }
 

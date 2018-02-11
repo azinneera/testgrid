@@ -62,6 +62,6 @@ public class GitUtil {
         if (repositoryUrl.endsWith(".git")) {
             repositoryUrl = repositoryUrl.substring(0, repositoryUrl.length() - 4);
         }
-        return repositoryUrl.substring(repositoryUrl.lastIndexOf("/") + 1);
+        return StringUtil.concatStrings(repositoryUrl.substring(repositoryUrl.lastIndexOf("/"), 1));
     }
 }

@@ -63,7 +63,7 @@ public class GenerateReportCommand implements Command {
     @Override
     public void execute() throws CommandExecutionException {
         try {
-            logger.info("Generating test result report for " + productName);
+            logger.info(StringUtil.concatStrings("Generating test result report for ", productName));
 
             Product product = getProduct(productName);
             LogFilePathLookup.setLogFilePath(deriveLogFilePath(productName));

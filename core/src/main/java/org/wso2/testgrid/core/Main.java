@@ -23,6 +23,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.testgrid.common.exception.CommandExecutionException;
+import org.wso2.testgrid.common.util.StringUtil;
 import org.wso2.testgrid.common.util.TestGridUtil;
 import org.wso2.testgrid.core.command.CommandHandler;
 
@@ -44,7 +45,7 @@ public class Main {
             CmdLineParser parser = new CmdLineParser(commandHandler);
             parser.parseArgument(args);
             String testGridHome = TestGridUtil.getTestGridHomePath();
-            logger.info("TestGrid Home\t: " + testGridHome);
+            logger.info(StringUtil.concatStrings("TestGrid Home\t: ", testGridHome));
 
             commandHandler.execute();
         } catch (CmdLineException e) {
