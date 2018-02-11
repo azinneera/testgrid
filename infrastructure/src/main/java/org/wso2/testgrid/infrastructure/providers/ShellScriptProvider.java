@@ -27,6 +27,7 @@ import org.wso2.testgrid.common.Script;
 import org.wso2.testgrid.common.ShellExecutor;
 import org.wso2.testgrid.common.exception.CommandExecutionException;
 import org.wso2.testgrid.common.exception.TestGridInfrastructureException;
+import org.wso2.testgrid.common.util.StringUtil;
 
 import java.nio.file.Paths;
 
@@ -56,11 +57,13 @@ public class ShellScriptProvider implements InfrastructureProvider {
         logger.info("Executing provisioning scripts...");
         try {
             ShellExecutor executor = new ShellExecutor(null);
-            executor.executeCommand("bash " + Paths
-                    .get(testPlanLocation, getScriptToExecute(infrastructure, Script.ScriptType.INFRA_CREATE)));
+            String command = StringUtil.concatStrings("bash ", Paths.get(testPlanLocation,
+                    getScriptToExecute(infrastructure, Script.ScriptType.INFRA_CREATE)).toString());
+            executor.executeCommand(command);
         } catch (CommandExecutionException e) {
-            throw new TestGridInfrastructureException("Exception occurred while executing the infra-create script " +
-                                                      "for deployment-pattern '" + infrastructure.getName() + "'" , e);
+            throw new TestGridInfrastructureException(StringUtil.concatStrings(
+                    "Exception occurred while executing the infra-create script for deployment-pattern '",
+                    infrastructure.getName(), "'") , e);
         }
         return new Deployment();
     }
@@ -73,15 +76,15 @@ public class ShellScriptProvider implements InfrastructureProvider {
         logger.info("Destroying test environment...");
         ShellExecutor executor = new ShellExecutor(null);
         try {
-
-            if (executor.executeCommand("bash " + Paths
-                    .get(testPlanLocation, getScriptToExecute(infrastructure, Script.ScriptType.INFRA_DESTROY)))) {
+            String command = StringUtil.concatStrings("bash ", Paths.get(testPlanLocation,
+                    getScriptToExecute(infrastructure, Script.ScriptType.INFRA_DESTROY)));
+            if (executor.executeCommand(command)) {
                 return true;
             }
         } catch (CommandExecutionException e) {
-            throw new TestGridInfrastructureException(
-                    "Exception occurred while executing the infra-destroy script " + "for deployment-pattern '"
-                            + infrastructure.getName() + "'", e);
+            throw new TestGridInfrastructureException(StringUtil.concatStrings(
+                    "Exception occurred while executing the infra-destroy script for deployment-pattern '",
+                            infrastructure.getName(), "'"), e);
         }
         return false;
     }

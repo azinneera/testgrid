@@ -22,6 +22,7 @@ package org.wso2.testgrid.infrastructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.testgrid.common.exception.TestGridException;
+import org.wso2.testgrid.common.util.StringUtil;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -46,7 +47,7 @@ public class InfrastructurePlanGenerator {
 
         String template = new String(Files.readAllBytes(templatePath), Charset.forName("UTF-8"));
         for (Map.Entry<String, String> entry : inputParams.entrySet()) {
-            String pattern = "#_" + entry.getKey() + "_#";
+            String pattern = StringUtil.concatStrings("#_", entry.getKey(), "_#");
             template = template.replace(pattern, entry.getValue());
         }
 
@@ -55,7 +56,8 @@ public class InfrastructurePlanGenerator {
         if (matcher.find()) {
             MatchResult matchResult = matcher.toMatchResult();
             String errorVar = template.substring(matchResult.start(), matchResult.end());
-            throw new TestGridException("Generated output still have template variables: " + errorVar);
+            throw new TestGridException(StringUtil.concatStrings(
+                    "Generated output still have template variables: ", errorVar));
         }
 
         Files.write(output, template.getBytes(Charset.forName("UTF-8")));
@@ -63,17 +65,17 @@ public class InfrastructurePlanGenerator {
 
     private void validate(Path templatePath, Map<String, String> inputParams, Path output) {
         if (!Files.exists(templatePath)) {
-            throw new IllegalArgumentException("Provided template path '" + templatePath +
-                    "' does not exist.");
+            throw new IllegalArgumentException(StringUtil.concatStrings(
+                    "Provided template path '", templatePath, "' does not exist."));
         }
 
         output = output.toAbsolutePath();
         Path outputParent = output.getParent();
         if (outputParent != null && !Files.exists(outputParent)) {
-            throw new IllegalArgumentException("Output cannot be created, its parent folder does not exist'" +
-                    output.getParent());
+            throw new IllegalArgumentException(StringUtil.concatStrings(
+                    "Output cannot be created, its parent folder does not exist'", output.getParent()));
         } else if (Files.exists(output)) {
-            logger.warn("Output path exists already. It will be overwritten: " + output);
+            logger.warn(StringUtil.concatStrings("Output path exists already. It will be overwritten: ", output));
         }
 
     }

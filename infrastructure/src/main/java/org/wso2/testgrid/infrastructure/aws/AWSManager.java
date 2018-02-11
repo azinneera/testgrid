@@ -201,8 +201,8 @@ public class AWSManager {
         try {
             describeStacksRequestWaiter.run(new WaiterParameters<>(new DescribeStacksRequest()));
         } catch (WaiterUnrecoverableException e) {
-            throw new TestGridInfrastructureException("Error occured while waiting for Stack :"
-                    + cloudFormationName + " deletion !");
+            throw new TestGridInfrastructureException(StringUtil.concatStrings(
+                    "Error occured while waiting for Stack :", cloudFormationName, " deletion !"));
         }
         return true;
     }
@@ -230,7 +230,8 @@ public class AWSManager {
                 Parameter awsParam = new Parameter().withParameterKey((String) key).withParameterValue(envVariable);
                 cfCompatibleParameters.add(awsParam);
             } else {
-                throw new TestGridInfrastructureException("Environment Variable " + value + " not found !!");
+                throw new TestGridInfrastructureException(StringUtil.concatStrings(
+                        "Environment Variable ", value, " not found !!"));
             }
         }));
 

@@ -22,6 +22,7 @@ import org.wso2.testgrid.common.Infrastructure;
 import org.wso2.testgrid.common.InfrastructureProvider;
 import org.wso2.testgrid.common.exception.InfrastructureProviderInitializationException;
 import org.wso2.testgrid.common.exception.UnsupportedProviderException;
+import org.wso2.testgrid.common.util.StringUtil;
 
 import java.util.ServiceLoader;
 
@@ -47,16 +48,14 @@ public class InfrastructureProviderFactory {
             if (provider.canHandle(infrastructure)) {
                 try {
                     return provider.getClass().newInstance();
-                } catch (InstantiationException e) {
-                    throw new InfrastructureProviderInitializationException("Exception occurred while instantiating " +
-                            "the InfrastructureProvider for requested type '" + providerName + "'", e);
-                } catch (IllegalAccessException e) {
-                    throw new InfrastructureProviderInitializationException("Exception occurred while instantiating " +
-                            "the InfrastructureProvider for requested type '" + providerName + "'", e);
+                } catch (InstantiationException | IllegalAccessException e) {
+                    throw new InfrastructureProviderInitializationException(StringUtil.concatStrings(
+                            "Exception occurred while instantiating the InfrastructureProvider for requested type '",
+                            providerName + "'", e));
                 }
             }
         }
-        throw new UnsupportedProviderException("Unable to find a InfrastructureProvider for requested type '" +
-                providerName + "'");
+        throw new UnsupportedProviderException(StringUtil.concatStrings(
+                "Unable to find a InfrastructureProvider for requested type '", providerName, "'"));
     }
 }
