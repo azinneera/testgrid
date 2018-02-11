@@ -104,7 +104,8 @@ public class TestReportEngine {
             Path reportPath = Paths.get(testGridHome).resolve(product.getName()).resolve(fileName);
             writeHTMLToFile(reportPath, htmlString);
         } catch (IOException e) {
-            throw new ReportingException("Error while persisting HTML report at " + fileName, e);
+            throw new ReportingException(StringUtil.concatStrings(
+                    "Error while persisting HTML report at ", fileName), e);
         }
     }
 
@@ -642,7 +643,7 @@ public class TestReportEngine {
      * @throws ReportingException thrown when error on writing the HTML string to file
      */
     private void writeHTMLToFile(Path filePath, String htmlString) throws ReportingException {
-        logger.info("Writing test results to file: " + filePath.toString());
+        logger.info(StringUtil.concatStrings("Writing test results to file: ", filePath.toString()));
         FileUtil.writeToFile(filePath.toAbsolutePath().toString(), htmlString);
     }
 }
