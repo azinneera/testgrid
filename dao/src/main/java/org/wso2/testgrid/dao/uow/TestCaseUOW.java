@@ -19,6 +19,7 @@ package org.wso2.testgrid.dao.uow;
 
 import org.wso2.testgrid.common.TestCase;
 import org.wso2.testgrid.common.TestScenario;
+import org.wso2.testgrid.common.util.StringUtil;
 import org.wso2.testgrid.dao.EntityManagerHelper;
 import org.wso2.testgrid.dao.TestGridDAOException;
 import org.wso2.testgrid.dao.repository.TestCaseRepository;
@@ -78,8 +79,9 @@ public class TestCaseUOW {
      */
     @SuppressWarnings("unchecked")
     public boolean isExistsFailedTests(TestScenario testScenario) throws TestGridDAOException {
-        List<Object> resultObject = testCaseRepository.executeTypedQuery("SELECT * FROM test_case "
-                + "WHERE TESTSCENARIO_id = '" + testScenario.getId() + "' AND is_success = FALSE;");
+        List<Object> resultObject = testCaseRepository.executeTypedQuery(StringUtil.concatStrings(
+                "SELECT * FROM test_case WHERE TESTSCENARIO_id = '", testScenario.getId(),
+                "' AND is_success = FALSE;"));
 
         return resultObject.isEmpty();
     }

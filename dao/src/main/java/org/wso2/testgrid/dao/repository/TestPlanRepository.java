@@ -122,16 +122,17 @@ public class TestPlanRepository extends AbstractRepository<TestPlan> {
      */
     public List<TestPlan> findByDeploymentPatternAndDate(String deploymentId, Timestamp date) throws
             TestGridDAOException {
-        String queryStr = "SELECT tp.id, tp.DEPLOYMENTPATTERN_id, tp.infra_parameters, tp.status FROM (SELECT " +
-                "infra_parameters, max(created_timestamp) AS maxtime, DEPLOYMENTPATTERN_id FROM test_plan WHERE " +
-                "created_timestamp <= '" + date + "' AND DEPLOYMENTPATTERN_id = '" + deploymentId + "' GROUP BY " +
-                "infra_parameters) AS r INNER JOIN test_plan AS tp on tp.infra_parameters = r.infra_parameters AND " +
-                "tp.created_timestamp = r.maxtime AND tp.DEPLOYMENTPATTERN_id = r.DEPLOYMENTPATTERN_id;";
+        String queryStr = StringUtil.concatStrings(
+                "SELECT tp.id, tp.DEPLOYMENTPATTERN_id, tp.infra_parameters, tp.status FROM (SELECT ",
+                "infra_parameters, max(created_timestamp) AS maxtime, DEPLOYMENTPATTERN_id FROM test_plan WHERE ",
+                "created_timestamp <= '", date, "' AND DEPLOYMENTPATTERN_id = '", deploymentId, "' GROUP BY ",
+                "infra_parameters) AS r INNER JOIN test_plan AS tp on tp.infra_parameters = r.infra_parameters AND ",
+                "tp.created_timestamp = r.maxtime AND tp.DEPLOYMENTPATTERN_id = r.DEPLOYMENTPATTERN_id;");
         try {
             Query query = entityManager.createNativeQuery(queryStr, TestPlan.class);
             return query.getResultList();
         } catch (Exception e) {
-            throw new TestGridDAOException(StringUtil.concatStrings("Error on executing the native SQL" +
+            throw new TestGridDAOException(StringUtil.concatStrings("Error on executing the native SQL",
                     " query [", queryStr, "]"), e);
         }
     }
@@ -143,12 +144,12 @@ public class TestPlanRepository extends AbstractRepository<TestPlan> {
      * @return instance of a {@link TestPlan} representing the last failed test plan.
      */
     public TestPlan getLastFailure(Product product) {
-        String sql = "SELECT  t.* from test_plan t INNER JOIN (SELECT tp.infra_parameters," +
-                "max(tp.modified_timestamp) AS time, dp.name FROM test_plan tp INNER JOIN " +
-                "deployment_pattern dp ON tp.DEPLOYMENTPATTERN_id=dp.id AND tp.status='FAIL' " +
-                "AND  tp.DEPLOYMENTPATTERN_id IN (SELECT id FROM deployment_pattern WHERE " +
-                "PRODUCT_id = ?) GROUP BY tp.infra_parameters,dp.name) as x ON " +
-                "t.infra_parameters=x.infra_parameters AND t.modified_timestamp=x.time ORDER BY time DESC LIMIT 1";
+        String sql = StringUtil.concatStrings("SELECT  t.* from test_plan t INNER JOIN (SELECT tp.infra_parameters,",
+                "max(tp.modified_timestamp) AS time, dp.name FROM test_plan tp INNER JOIN ",
+                "deployment_pattern dp ON tp.DEPLOYMENTPATTERN_id=dp.id AND tp.status='FAIL' ",
+                "AND  tp.DEPLOYMENTPATTERN_id IN (SELECT id FROM deployment_pattern WHERE ",
+                "PRODUCT_id = ?) GROUP BY tp.infra_parameters,dp.name) as x ON ",
+                "t.infra_parameters=x.infra_parameters AND t.modified_timestamp=x.time ORDER BY time DESC LIMIT 1");
 
         List resultList = entityManager.createNativeQuery(sql, TestPlan.class)
                 .setParameter(1, product.getId())
@@ -167,12 +168,12 @@ public class TestPlanRepository extends AbstractRepository<TestPlan> {
      * @return instance of {@link TestPlan} for the last build
      */
     public TestPlan getLastBuild(Product product) {
-        String sql = "select  t.* from test_plan t inner join (select tp.infra_parameters," +
-                "max(tp.modified_timestamp) AS time, dp.name from test_plan tp inner join " +
-                "deployment_pattern dp on tp.DEPLOYMENTPATTERN_id=dp.id and  tp.DEPLOYMENTPATTERN_id " +
-                "in (select id from deployment_pattern where PRODUCT_id=?)" +
-                "group by tp.infra_parameters,dp.name) AS x on t.infra_parameters=x.infra_parameters " +
-                "AND t.modified_timestamp=x.time order by time desc limit 1";
+        String sql = StringUtil.concatStrings("select  t.* from test_plan t inner join (select tp.infra_parameters,",
+                "max(tp.modified_timestamp) AS time, dp.name from test_plan tp inner join ",
+                "deployment_pattern dp on tp.DEPLOYMENTPATTERN_id=dp.id and  tp.DEPLOYMENTPATTERN_id ",
+                "in (select id from deployment_pattern where PRODUCT_id=?)",
+                "group by tp.infra_parameters,dp.name) AS x on t.infra_parameters=x.infra_parameters ",
+                "AND t.modified_timestamp=x.time order by time desc limit 1");
 
         List resultList = entityManager.createNativeQuery(sql, TestPlan.class)
                 .setParameter(1, product.getId())
@@ -192,12 +193,12 @@ public class TestPlanRepository extends AbstractRepository<TestPlan> {
      * @return a list of {@link TestPlan}
      */
     public List<TestPlan> getLatestTestPlans(Product product) {
-        String sql = "select t.* from test_plan t inner join (select tp.infra_parameters," +
-                "max(tp.modified_timestamp) AS time, dp.name from test_plan tp inner join " +
-                "deployment_pattern dp on tp.DEPLOYMENTPATTERN_id=dp.id  and tp.DEPLOYMENTPATTERN_id in " +
-                "(select id from deployment_pattern where PRODUCT_id= ? ) " +
-                "group by tp.infra_parameters,dp.name) as x on t.infra_parameters=x.infra_parameters " +
-                "AND t.modified_timestamp=x.time;";
+        String sql = StringUtil.concatStrings("select t.* from test_plan t inner join (select tp.infra_parameters,",
+                "max(tp.modified_timestamp) AS time, dp.name from test_plan tp inner join ",
+                "deployment_pattern dp on tp.DEPLOYMENTPATTERN_id=dp.id  and tp.DEPLOYMENTPATTERN_id in ",
+                "(select id from deployment_pattern where PRODUCT_id= ? ) ",
+                "group by tp.infra_parameters,dp.name) as x on t.infra_parameters=x.infra_parameters ",
+                "AND t.modified_timestamp=x.time;");
 
         return (List<TestPlan>) entityManager.createNativeQuery(sql, TestPlan.class)
                 .setParameter(1, product.getId())
@@ -211,8 +212,9 @@ public class TestPlanRepository extends AbstractRepository<TestPlan> {
      * @return a {@link TestPlan} representing the last failed build
      */
     public TestPlan getLastFailure(TestPlan testPlan) {
-        String sql = "select * from test_plan where infra_parameters= ?  AND DEPLOYMENTPATTERN_id=? " +
-                " AND status='FAIL' order by modified_timestamp desc limit 1";
+        String sql = StringUtil.concatStrings(
+                "select * from test_plan where infra_parameters= ?  AND DEPLOYMENTPATTERN_id=? ",
+                " AND status='FAIL' order by modified_timestamp desc limit 1");
 
         List resultList = entityManager.createNativeQuery(sql, TestPlan.class)
                 .setParameter(1, testPlan.getInfraParameters())
@@ -234,9 +236,9 @@ public class TestPlanRepository extends AbstractRepository<TestPlan> {
      * @return a List of {@link TestPlan} representing the history of that test plan
      */
     public List<TestPlan> getTestPlanHistory(TestPlan testPlan) {
-        String sql = " select t.* from test_plan t inner join deployment_pattern dp inner " +
-                "join product p on p.id=dp.PRODUCT_id and dp.id=t.DEPLOYMENTPATTERN_id " +
-                "where t.infra_parameters=? AND dp.id=? AND p.id=?";
+        String sql = StringUtil.concatStrings(" select t.* from test_plan t inner join deployment_pattern dp inner ",
+                "join product p on p.id=dp.PRODUCT_id and dp.id=t.DEPLOYMENTPATTERN_id ",
+                "where t.infra_parameters=? AND dp.id=? AND p.id=?");
         return entityManager.createNativeQuery(sql, TestPlan.class)
                 .setParameter(1, testPlan.getInfraParameters())
                 .setParameter(2, testPlan.getDeploymentPattern().getId())

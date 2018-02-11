@@ -125,14 +125,15 @@ public class DeploymentPatternRepository extends AbstractRepository<DeploymentPa
      */
     public List<DeploymentPattern> findByProductAndDate(String productId, Timestamp date)
             throws TestGridDAOException {
-        String queryStr = "SELECT dp.id, dp.name, dp.PRODUCT_id FROM deployment_pattern AS dp INNER JOIN test_plan " +
-                "AS tp ON dp.id = tp.DEPLOYMENTPATTERN_id where tp.created_timestamp <= '" + date + "' AND " +
-                "dp.PRODUCT_id = '" + productId + "' GROUP BY dp.id;";
+        String queryStr = StringUtil.concatStrings(
+                "SELECT dp.id, dp.name, dp.PRODUCT_id FROM deployment_pattern AS dp INNER JOIN test_plan ",
+                "AS tp ON dp.id = tp.DEPLOYMENTPATTERN_id where tp.created_timestamp <= '", date,
+                "' AND dp.PRODUCT_id = '", productId, "' GROUP BY dp.id;");
         try {
             Query query = entityManager.createNativeQuery(queryStr, DeploymentPattern.class);
             return query.getResultList();
         } catch (Exception e) {
-            throw new TestGridDAOException(StringUtil.concatStrings("Error on executing the native SQL" +
+            throw new TestGridDAOException(StringUtil.concatStrings("Error on executing the native SQL",
                     " query [", queryStr, "]"), e);
         }
     }
@@ -147,15 +148,16 @@ public class DeploymentPatternRepository extends AbstractRepository<DeploymentPa
      */
     public List<DeploymentPatternTestFailureStat> findFailedTestCounts(String productId, Timestamp date)
             throws TestGridDAOException {
-        String queryStr = "SELECT tp.DEPLOYMENTPATTERN_id AS deploymentPatternId, COUNT(*) AS failureCount FROM " +
-                "test_plan tp WHERE tp.DEPLOYMENTPATTERN_id IN (SELECT id from deployment_pattern where " +
-                "PRODUCT_id = '" + productId + "') AND tp.created_timestamp <= '" + date + "' AND " +
-                "tp.status = '" + Status.FAIL.name() + "' GROUP BY tp.DEPLOYMENTPATTERN_id;";
+        String queryStr = StringUtil.concatStrings(
+                "SELECT tp.DEPLOYMENTPATTERN_id AS deploymentPatternId, COUNT(*) AS failureCount FROM ",
+                "test_plan tp WHERE tp.DEPLOYMENTPATTERN_id IN (SELECT id from deployment_pattern where PRODUCT_id = '",
+                productId, "') AND tp.created_timestamp <= '", date, "' AND tp.status = '", Status.FAIL.name(),
+                "' GROUP BY tp.DEPLOYMENTPATTERN_id;");
         try {
             Query query = entityManager.createNativeQuery(queryStr);
             return this.getDeploymentPatternTestFailureStats(query.getResultList());
         } catch (Exception e) {
-            throw new TestGridDAOException(StringUtil.concatStrings("Error on executing the native SQL " +
+            throw new TestGridDAOException(StringUtil.concatStrings("Error on executing the native SQL ",
                     "query [", queryStr, "]"), e);
         }
     }

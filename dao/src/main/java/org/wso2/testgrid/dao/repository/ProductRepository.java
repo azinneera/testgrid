@@ -121,16 +121,17 @@ public class ProductRepository extends AbstractRepository<Product> {
      * @return result list after executing the query
      */
     public List<ProductTestStatus> getProductTestHistory(Timestamp date) throws TestGridDAOException {
-        String queryStr = "SELECT p.id, p.name, dp.id AS deploymentPatternId, dp.name AS " +
-                "deploymentPattern, tp.status, tp.created_timestamp AS testExecutionTime FROM product AS p" +
-                " INNER JOIN deployment_pattern AS dp ON p.id = dp.PRODUCT_id INNER JOIN test_plan AS tp ON " +
-                "dp.id = tp.DEPLOYMENTPATTERN_id WHERE tp.created_timestamp >= '" + date + "' ORDER BY p.name, " +
-                "tp.created_timestamp DESC;";
+        String queryStr = StringUtil.concatStrings(
+                "SELECT p.id, p.name, dp.id AS deploymentPatternId, dp.name AS ",
+                "deploymentPattern, tp.status, tp.created_timestamp AS testExecutionTime FROM product AS p",
+                " INNER JOIN deployment_pattern AS dp ON p.id = dp.PRODUCT_id INNER JOIN test_plan AS tp ON ",
+                "dp.id = tp.DEPLOYMENTPATTERN_id WHERE tp.created_timestamp >= '", date, "' ORDER BY p.name, ",
+                "tp.created_timestamp DESC;");
         try {
             Query query = entityManager.createNativeQuery(queryStr);
             return this.getProductTestStatuses(query.getResultList());
         } catch (Exception e) {
-            throw new TestGridDAOException(StringUtil.concatStrings("Error on executing the native SQL" +
+            throw new TestGridDAOException(StringUtil.concatStrings("Error on executing the native SQL",
                     " query [", queryStr, "]"), e);
         }
     }

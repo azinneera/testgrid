@@ -19,6 +19,7 @@ package org.wso2.testgrid.dao.uow;
 
 import org.wso2.testgrid.common.TestPlan;
 import org.wso2.testgrid.common.TestScenario;
+import org.wso2.testgrid.common.util.StringUtil;
 import org.wso2.testgrid.dao.EntityManagerHelper;
 import org.wso2.testgrid.dao.TestGridDAOException;
 import org.wso2.testgrid.dao.repository.TestScenarioRepository;
@@ -78,8 +79,8 @@ public class TestScenarioUOW {
      * @throws TestGridDAOException thrown when error processing native query
      */
     public boolean isFailedTestScenariosExist(TestPlan testPlan) throws TestGridDAOException {
-        List<Object> resultObject = testScenarioRepository.executeTypedQuery("SELECT * FROM test_scenario "
-                + "WHERE TESTPLAN_id = '" + testPlan.getId() + "' AND status = 'FAIL';");
+        List<Object> resultObject = testScenarioRepository.executeTypedQuery(StringUtil.concatStrings(
+                "SELECT * FROM test_scenario WHERE TESTPLAN_id = '", testPlan.getId(), "' AND status = 'FAIL';"));
         return !resultObject.isEmpty();
     }
 }
