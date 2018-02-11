@@ -21,6 +21,7 @@ import org.wso2.testgrid.common.DeployerService;
 import org.wso2.testgrid.common.TestPlan;
 import org.wso2.testgrid.common.exception.DeployerInitializationException;
 import org.wso2.testgrid.common.exception.UnsupportedDeployerException;
+import org.wso2.testgrid.common.util.StringUtil;
 
 import java.util.ServiceLoader;
 
@@ -46,12 +47,10 @@ public class DeployerFactory {
             if (deployerService.getDeployerName().equals(deployerType)) {
                 try {
                     return deployerService.getClass().newInstance();
-                } catch (InstantiationException e) {
-                        throw new DeployerInitializationException("Exception occurred while instantiating the" +
-                                " DeployerFactory for requested type '" + deployerType + "'", e);
-                } catch (IllegalAccessException e) {
-                    throw new DeployerInitializationException("Exception occurred while instantiating the" +
-                            " DeployerFactory for requested type '" + deployerType + "'", e);
+                } catch (InstantiationException | IllegalAccessException e) {
+                        throw new DeployerInitializationException(StringUtil.concatStrings(
+                                "Exception occurred while instantiating the",
+                                " DeployerFactory for requested type '", deployerType, "'"), e);
                 }
             }
         }

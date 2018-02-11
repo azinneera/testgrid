@@ -59,17 +59,18 @@ public class AWSDeployer implements DeployerService {
             for (Host host : deployment.getHosts()) {
                 try {
                     new URL(host.getIp());
-                    logger.info("Waiting for server startup on URL : " + host.getIp());
+                    logger.info(StringUtil.concatStrings("Waiting for server startup on URL : ", host.getIp()));
                 } catch (MalformedURLException e) {
-                    logger.debug(StringUtil.concatStrings("Output Value : ", host.getIp(), " is Not a Valid URL, " +
+                    logger.debug(StringUtil.concatStrings("Output Value : ", host.getIp(), " is Not a Valid URL, ",
                             "hence skipping to next value.."));
                     continue;
                 }
                 validator.waitForDeployment(host.getIp(), TIMEOUT, TIMEOUT_UNIT, POLL_INTERVAL, POLL_UNIT);
             }
         } catch (ConditionTimeoutException ex) {
-            throw new TestGridDeployerException(StringUtil.concatStrings("Timeout occurred while waiting for pattern : "
-                    , deployment.getName(), "Timeout value : ", TIMEOUT, TIMEOUT_UNIT.toString()), ex);
+            throw new TestGridDeployerException(StringUtil.concatStrings(
+                    "Timeout occurred while waiting for pattern : ",
+                    deployment.getName(), "Timeout value : ", TIMEOUT, TIMEOUT_UNIT.toString()), ex);
         }
 
         return deployment;

@@ -24,6 +24,7 @@ import org.wso2.testgrid.common.Deployment;
 import org.wso2.testgrid.common.ShellExecutor;
 import org.wso2.testgrid.common.exception.CommandExecutionException;
 import org.wso2.testgrid.common.exception.TestGridDeployerException;
+import org.wso2.testgrid.common.util.StringUtil;
 import org.wso2.testgrid.common.util.TestGridUtil;
 
 import java.io.IOException;
@@ -47,11 +48,12 @@ public class ShellDeployer implements DeployerService {
 
     @Override
     public Deployment deploy(Deployment deployment) throws TestGridDeployerException {
-        logger.info("Performing the Deployment " + deployment.getName());
+        logger.info(StringUtil.concatStrings("Performing the Deployment ", deployment.getName()));
         try {
         ShellExecutor shellExecutor = new ShellExecutor(Paths.get(TestGridUtil.getTestGridHomePath()));
-            if (!shellExecutor
-                    .executeCommand("bash " + Paths.get(deployment.getDeploymentScriptsDir(), DEPLOY_SCRIPT_NAME))) {
+        String command = StringUtil.concatStrings(
+                "bash ", Paths.get(deployment.getDeploymentScriptsDir(), DEPLOY_SCRIPT_NAME));
+            if (!shellExecutor.executeCommand(command)) {
                 throw new TestGridDeployerException("Error occurred while executing the deploy script");
             }
         } catch (CommandExecutionException e) {

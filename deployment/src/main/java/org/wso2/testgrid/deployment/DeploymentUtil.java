@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.testgrid.common.Deployment;
 import org.wso2.testgrid.common.exception.TestGridDeployerException;
+import org.wso2.testgrid.common.util.StringUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,8 +51,8 @@ public class DeploymentUtil {
             return mapper.readValue(file, Deployment.class);
         } catch (IOException e) {
             logger.error(e.getMessage());
-            throw new TestGridDeployerException("Error occurred while reading the "
-                    + DeployerConstants.DEPLOYMENT_FILE + " file", e);
+            throw new TestGridDeployerException(StringUtil.concatStrings("Error occurred while reading the ",
+                    DeployerConstants.DEPLOYMENT_FILE , " file"), e);
         }
     }
 }

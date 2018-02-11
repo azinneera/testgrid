@@ -19,6 +19,8 @@ package org.wso2.testgrid.deployment;
 
 import org.awaitility.Awaitility;
 import org.wso2.testgrid.common.exception.TestGridDeployerException;
+import org.wso2.testgrid.common.util.StringUtil;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -101,11 +103,13 @@ public class DeploymentValidator {
                 response = (urlConn.getResponseCode() == HttpURLConnection.HTTP_OK);
 
             } catch (MalformedURLException e) {
-                throw new TestGridDeployerException("Deployment URL " + urlString + " is malformed", e);
+                throw new TestGridDeployerException(StringUtil.concatStrings(
+                        "Deployment URL ", urlString, " is malformed"), e);
             } catch (NoSuchAlgorithmException e) {
                 throw new TestGridDeployerException("Error configuring the SSL client", e);
             } catch (IOException e) {
-                throw new TestGridDeployerException("Error when connecting with URL :" + urlString, e);
+                throw new TestGridDeployerException(
+                        StringUtil.concatStrings("Error when connecting with URL :", urlString), e);
             } catch (KeyManagementException e) {
                 throw new TestGridDeployerException("Error occurred while configuring key manager", e);
             }
