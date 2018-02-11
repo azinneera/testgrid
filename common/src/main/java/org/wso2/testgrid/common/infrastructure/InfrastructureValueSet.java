@@ -74,9 +74,10 @@ public class InfrastructureValueSet {
 
     @Override
     public String toString() {
-        return "InfrastructureValueSet{" +
-                "name='" + type + '\'' +
-                ", values=\n" + values +
-                "\n}";
+        return StringUtil
+        .concatStrings("InfrastructureValueSet{",
+                "name='", type, '\'',
+                ", values=\n", values,
+                "\n}");
     }
 }

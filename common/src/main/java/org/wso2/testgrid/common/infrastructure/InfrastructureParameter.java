@@ -20,6 +20,7 @@
 package org.wso2.testgrid.common.infrastructure;
 
 import org.wso2.testgrid.common.AbstractUUIDEntity;
+import org.wso2.testgrid.common.util.StringUtil;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -127,12 +128,12 @@ public class InfrastructureParameter extends AbstractUUIDEntity implements
 
     @Override
     public String toString() {
-        return "InfrastructureParameter{" +
-                "name='" + name + '\'' +
-                ", type='" + type + '\'' +
-                ", properties='" + properties + '\'' +
-                ", readyForTestGrid=" + readyForTestGrid +
-                '}';
+        return StringUtil.concatStrings("InfrastructureParameter{",
+                "name='", name, '\'',
+                ", type='", type, '\'',
+                ", properties='", properties, '\'',
+                ", readyForTestGrid=", readyForTestGrid,
+                '}');
     }
 
     @Override

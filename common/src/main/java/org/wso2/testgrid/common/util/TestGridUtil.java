@@ -69,7 +69,8 @@ public final class TestGridUtil {
     public static boolean executeCommand(String command, File workingDirectory) throws CommandExecutionException {
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Running shell command : " + command + ", from directory : " + workingDirectory.getName());
+            logger.debug(StringUtil.concatStrings("Running shell command : ", command, ", from directory : ",
+                    workingDirectory.getName()));
         }
 
         ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
@@ -90,15 +91,17 @@ public final class TestGridUtil {
                     builder.append(System.getProperty("line.separator"));
                 }
                 String result = builder.toString();
-                logger.info("Execution result : " + result);
+                logger.info(StringUtil.concatStrings("Execution result : ", result));
                 return true;
             } catch (IOException e) {
-                throw new CommandExecutionException("Error occurred while fetching execution output of the command '"
-                                                    + command + "'", e);
+                throw new CommandExecutionException(StringUtil.concatStrings(
+                        "Error occurred while fetching execution output of the command '",
+                        command, "'"), e);
             }
         } catch (IOException e) {
-            throw new CommandExecutionException("Error occurred while executing the command '" + command + "', " +
-                                                "from directory '" + workingDirectory.getName() + "", e);
+            throw new CommandExecutionException(StringUtil.concatStrings(
+                    "Error occurred while executing the command '", command,
+                    " from directory '", workingDirectory.getName(), "", e));
         }
     }
 
@@ -116,7 +119,8 @@ public final class TestGridUtil {
             throws CommandExecutionException {
 
         if (logger.isDebugEnabled()) {
-            logger.debug("Running shell command : " + command + ", from directory : " + workingDirectory.getName());
+            logger.debug(StringUtil.concatStrings("Running shell command : ", command,
+                    " from directory : ", workingDirectory.getName()));
         }
 
         ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", command);
@@ -143,15 +147,17 @@ public final class TestGridUtil {
                     builder.append(System.getProperty("line.separator"));
                 }
                 String result = builder.toString();
-                logger.info("Execution result : " + result);
+                logger.info(StringUtil.concatStrings("Execution result : ", result));
                 return result;
             } catch (IOException e) {
-                throw new CommandExecutionException("Error occurred while fetching execution output of the command '"
-                                                    + command + "'", e);
+                throw new CommandExecutionException(StringUtil.concatStrings(
+                        "Error occurred while fetching execution output of the command '",
+                        command, "'", e));
             }
         } catch (IOException e) {
-            throw new CommandExecutionException("Error occurred while executing the command '" + command + "', " +
-                                                "from directory '" + workingDirectory.getName() + "", e);
+            throw new CommandExecutionException(StringUtil.concatStrings(
+                    "Error occurred while executing the command '", command, " from directory: " ,
+                    workingDirectory.getName(), e));
         }
     }
 
