@@ -17,7 +17,6 @@
  */
 package org.wso2.testgrid.logging;
 
-import com.sun.deploy.util.StringUtils;
 import org.eclipse.persistence.logging.AbstractSessionLog;
 import org.eclipse.persistence.logging.SessionLog;
 import org.eclipse.persistence.logging.SessionLogEntry;
