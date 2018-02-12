@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.testgrid.common.DeploymentPattern;
 import org.wso2.testgrid.common.DeploymentPatternTestFailureStat;
+import org.wso2.testgrid.common.util.StringUtil;
 import org.wso2.testgrid.dao.TestGridDAOException;
 import org.wso2.testgrid.dao.uow.DeploymentPatternUOW;
 import org.wso2.testgrid.web.bean.ErrorResponse;
@@ -88,12 +89,12 @@ public class DeploymentPatternService {
                 return Response.status(Response.Status.OK).entity(APIUtil.
                         getDeploymentPatternBean(deploymentPattern.get(), "")).build();
             } else {
+                String msg = StringUtil.concatStrings("Unable to find the requested Deployment-Pattern by id : " , id);
                 return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse.ErrorResponseBuilder().
-                        setMessage("Unable to find the requested Deployment-Pattern by id : '" + id + "'").build()).
-                        build();
+                        setMessage(msg).build()).build();
             }
         } catch (TestGridDAOException e) {
-            String msg = "Error occurred while fetching the Deployment-Pattern by id : '" + id + "'";
+            String msg = StringUtil.concatStrings("Error occurred while fetching the Deployment-Pattern by id : ", id);
             logger.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
@@ -128,8 +129,9 @@ public class DeploymentPatternService {
             return Response.status(Response.Status.OK).entity(APIUtil.getDeploymentPatternBeans(deploymentPatterns,
                     stats)).build();
         } catch (TestGridDAOException e) {
-            String msg = "Error occurred while fetching the Deployment-patterns with test info for the product id : '"
-                    + productId + "' , and date : '" + date + "'";
+            String msg = StringUtil.concatStrings(
+                    "Error occurred while fetching the Deployment-patterns with test info for the product id : ",
+                    productId, " , and date : '", date);
             logger.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();

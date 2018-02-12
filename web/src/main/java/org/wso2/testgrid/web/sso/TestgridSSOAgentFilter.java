@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.carbon.identity.sso.agent.SSOAgentConstants;
 import org.wso2.carbon.identity.sso.agent.SSOAgentFilter;
 import org.wso2.carbon.identity.sso.agent.bean.SSOAgentConfig;
+import org.wso2.testgrid.common.util.StringUtil;
 import org.wso2.testgrid.web.utils.Constants;
 
 import java.io.IOException;
@@ -124,25 +125,26 @@ public class TestgridSSOAgentFilter extends SSOAgentFilter {
      * Prepare HTMLPayload including the username and password values in the way IdP requests.
      */
     private String prepareHtmlPayloadForAuthorization(String userName, String password) {
-        String authorization = userName + ":" + password;
+        String authorization = StringUtil.concatStrings(userName, ":", password);
         // Base64 encoded username:password value.
         authorization = Arrays.toString(Base64.encode(authorization.getBytes(StandardCharsets.UTF_8)));
-        return "<html>\n" +
-                "<body>\n" +
-                "<p>You are now redirected back to " + properties.getProperty("SAML2.IdPURL") + " \n" +
-                "If the redirection fails, please click the post button.</p>\n" +
-                "<form method='post' action='" +  properties.getProperty("SAML2.IdPURL") + "'>\n" +
-                "<input type='hidden' name='sectoken' value='" + authorization + "'/>\n" +
-                "<p>\n" +
-                "<!--$saml_params-->\n" +
-                "<button type='submit'>POST</button>\n" +
-                "</p>\n" +
-                "</form>\n" +
-                "<script type='text/javascript'>\n" +
-                "document.forms[0].submit();\n" +
-                "</script>\n" +
-                "</body>\n" +
-                "</html>";
+        return StringUtil.concatStrings(
+                "<html>\n",
+                "<body>\n",
+                "<p>You are now redirected back to ", properties.getProperty("SAML2.IdPURL"), " \n",
+                "If the redirection fails, please click the post button.</p>\n",
+                "<form method='post' action='",  properties.getProperty("SAML2.IdPURL"), "'>\n",
+                "<input type='hidden' name='sectoken' value='", authorization, "'/>\n",
+                "<p>\n",
+                "<!--$saml_params-->\n",
+                "<button type='submit'>POST</button>\n",
+                "</p>\n",
+                "</form>\n",
+                "<script type='text/javascript'>\n",
+                "document.forms[0].submit();\n",
+                "</script>\n",
+                "</body>\n",
+                "</html>");
 
     }
     @Override

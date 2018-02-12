@@ -29,6 +29,7 @@ import org.wso2.carbon.identity.sso.agent.SSOAgentException;
 import org.wso2.carbon.identity.sso.agent.saml.X509CredentialImpl;
 import org.wso2.carbon.identity.sso.agent.util.SSOAgentUtils;
 import org.wso2.testgrid.common.exception.TestGridException;
+import org.wso2.testgrid.common.util.StringUtil;
 import org.wso2.testgrid.web.bean.ErrorResponse;
 import org.wso2.testgrid.web.sso.SSOConfigurationReader;
 import org.wso2.testgrid.web.utils.Constants;
@@ -75,7 +76,8 @@ public class SSOService {
             String msg = "Error occurred while unmarshalling SAMLResponse.";
             logger.error(msg, e);
             return Response.serverError().entity(
-                    new ErrorResponse.ErrorResponseBuilder().setMessage(msg + e.getMessage()).build()).build();
+                    new ErrorResponse.ErrorResponseBuilder().setMessage(StringUtil.concatStrings(
+                            msg, e.getMessage())).build()).build();
         }
 
         try {
@@ -87,7 +89,8 @@ public class SSOService {
         } catch (SSOAgentException e) {
             String msg = "Signature validation failed. Observed an attempt with invalid SAMLResponse.";
             logger.error(msg, e);
-            return Response.status(Response.Status.UNAUTHORIZED).entity(msg + e.getMessage()).build();
+            return Response.status(Response.Status.UNAUTHORIZED).entity(StringUtil.concatStrings(
+                    msg, e.getMessage())).build();
         }
     }
 
@@ -106,8 +109,8 @@ public class SSOService {
             SAMLSignatureProfileValidator signatureProfileValidator = new SAMLSignatureProfileValidator();
             signatureProfileValidator.validate(signImpl);
         } catch (ValidationException e) {
-            throw new TestGridException("Signature do not conform to SAML signature profile. Possible XML Signature " +
-                    "Wrapping Attack!", e);
+            throw new TestGridException(
+                    "Signature do not conform to SAML signature profile. Possible XML Signature Wrapping Attack!", e);
         }
 
         SSOConfigurationReader ssoConfigurationReader = new SSOConfigurationReader();

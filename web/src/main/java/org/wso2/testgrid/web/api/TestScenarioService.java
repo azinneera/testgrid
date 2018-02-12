@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.testgrid.common.TestPlan;
 import org.wso2.testgrid.common.TestScenario;
+import org.wso2.testgrid.common.util.StringUtil;
 import org.wso2.testgrid.dao.TestGridDAOException;
 import org.wso2.testgrid.dao.uow.TestPlanUOW;
 import org.wso2.testgrid.dao.uow.TestScenarioUOW;
@@ -63,12 +64,14 @@ public class TestScenarioService {
                 return Response.status(Response.Status.OK).entity(APIUtil.getTestScenarioBeans(testScenarios,
                         requireTestCaseInfo)).build();
             } else {
+                String msg = StringUtil.concatStrings(
+                        "Unable to find the requested TestScenarios for the TestPlan id: ", testPlanId);
                 return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse.ErrorResponseBuilder().
-                        setMessage("Unable to find the requested TestScenarios for the TestPlan id : '" +
-                                testPlanId + "'").build()).build();
+                        setMessage(msg).build()).build();
             }
         } catch (TestGridDAOException e) {
-            String msg = "Error occurred while fetching the TestScenarios for the TestPlan : '" + testPlanId + "'";
+            String msg = StringUtil.concatStrings(
+                    "Error occurred while fetching the TestScenarios for the TestPlan: ", testPlanId);
             logger.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
@@ -91,11 +94,13 @@ public class TestScenarioService {
                 return Response.status(Response.Status.OK).entity(APIUtil.getTestScenarioBean(testScenario.get(),
                         true)).build();
             } else {
+                String msg = StringUtil.concatStrings(
+                        "Unable to find the requested TestScenario by id: ", id);
                 return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse.ErrorResponseBuilder().
-                        setMessage("Unable to find the requested TestScenario by id : '" + id + "'").build()).build();
+                        setMessage(msg).build()).build();
             }
         } catch (TestGridDAOException e) {
-            String msg = "Error occurred while fetching the TestScenario by id : '" + id + "'";
+            String msg = StringUtil.concatStrings("Error occurred while fetching the TestScenario by id: ", id);
             logger.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();

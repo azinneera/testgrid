@@ -80,12 +80,12 @@ public class ProductService {
             if (product.isPresent()) {
                 return Response.status(Response.Status.OK).entity(APIUtil.getProductBean(product.get())).build();
             } else {
+                String msg = StringUtil.concatStrings("Unable to find the requested Product by id : ", id);
                 return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse.ErrorResponseBuilder().
-                        setMessage("Unable to find the requested Product by id : '" + id + "'").build()).
-                        build();
+                        setMessage(msg).build()).build();
             }
         } catch (TestGridDAOException e) {
-            String msg = "Error occurred while fetching the Product by id : '" + id + "'";
+            String msg = StringUtil.concatStrings("Error occurred while fetching the Product by id : ", id);
             logger.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();

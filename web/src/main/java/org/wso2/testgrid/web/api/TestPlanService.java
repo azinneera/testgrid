@@ -25,6 +25,7 @@ import org.wso2.testgrid.common.TestCase;
 import org.wso2.testgrid.common.TestPlan;
 import org.wso2.testgrid.common.TestScenario;
 import org.wso2.testgrid.common.exception.TestGridException;
+import org.wso2.testgrid.common.util.StringUtil;
 import org.wso2.testgrid.common.util.TestGridUtil;
 import org.wso2.testgrid.dao.TestGridDAOException;
 import org.wso2.testgrid.dao.uow.TestPlanUOW;
@@ -130,11 +131,13 @@ public class TestPlanService {
                 return Response.status(Response.Status.OK).entity(APIUtil.getTestPlanBean(testPlan.get(),
                         requireTestScenarioInfo)).build();
             } else {
+                String msg = StringUtil.concatStrings(
+                        "Unable to find the requested TestPlan by id : ", id);
                 return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse.ErrorResponseBuilder().
-                        setMessage("Unable to find the requested TestPlan by id : '" + id + "'").build()).build();
+                        setMessage(msg).build()).build();
             }
         } catch (TestGridDAOException e) {
-            String msg = "Error occurred while fetching the TestPlan by id : '" + id + "'";
+            String msg = StringUtil.concatStrings("Error occurred while fetching the TestPlan by id : ", id);
             logger.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
@@ -156,7 +159,7 @@ public class TestPlanService {
             TestPlanUOW testPlanUOW = new TestPlanUOW();
             Optional<TestPlan> optionalTestPlan = testPlanUOW.getTestPlanById(id);
             if (!optionalTestPlan.isPresent()) {
-                String msg = "No test plan found for the given id " + id;
+                String msg = StringUtil.concatStrings("No test plan found for the given id: ", id);
                 logger.error(msg);
                 return Response.serverError()
                         .entity(new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
@@ -174,7 +177,7 @@ public class TestPlanService {
                                                                 artifactDownloadable.readArtifact(bucketKey);
             return Response.status(Response.Status.OK).entity(truncatedInputStreamData).build();
         } catch (TestGridDAOException e) {
-            String msg = "Error occurred while fetching the TestPlan by id : '" + id + "' ";
+            String msg = StringUtil.concatStrings("Error occurred while fetching the TestPlan by id : ", id);
             logger.error(msg, e);
             return Response.serverError()
                     .entity(new ErrorResponse.ErrorResponseBuilder().setMessage(msg)
@@ -214,7 +217,7 @@ public class TestPlanService {
             TestPlanUOW testPlanUOW = new TestPlanUOW();
             Optional<TestPlan> optionalTestPlan = testPlanUOW.getTestPlanById(id);
             if (!optionalTestPlan.isPresent()) {
-                String msg = "No test plan found for the given id " + id;
+                String msg = StringUtil.concatStrings("No test plan found for the given id: ", id);
                 logger.error(msg);
                 return Response.serverError()
                         .entity(new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
@@ -225,7 +228,7 @@ public class TestPlanService {
             TestExecutionSummary testExecutionSummary = getTestExecutionSummary(testPlan);
             return Response.status(Response.Status.OK).entity(testExecutionSummary).build();
         } catch (TestGridDAOException e) {
-            String msg = "Error occurred while fetching the TestPlan by id : '" + id + "'";
+            String msg = StringUtil.concatStrings("Error occurred while fetching the TestPlan by id : '", id);
             logger.error(msg, e);
             return Response.serverError()
                     .entity(new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
@@ -275,8 +278,8 @@ public class TestPlanService {
             return Response.status(Response.Status.CREATED).
                     entity(jobSpecificUrl).type(MediaType.TEXT_PLAIN).build();
         } catch (TestGridException | IOException e) {
-            String msg = "Error occurred while creating new test plan named : '" +
-                         testPlanRequest.getTestPlanName() + "'.";
+            String msg = StringUtil.concatStrings(
+                    "Error occurred while creating new test plan named : ", testPlanRequest.getTestPlanName());
             logger.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().
@@ -305,13 +308,14 @@ public class TestPlanService {
                 List<org.wso2.testgrid.web.bean.TestPlan> testPlanBeans = APIUtil.getTestPlanBeans(history, false);
                 return Response.status(Response.Status.OK).entity(testPlanBeans).build();
             } else {
-                String msg = "No test plan found for the given id " + testPlanId;
+                String msg = StringUtil.concatStrings("No test plan found for the given id ", testPlanId);
                 logger.error(msg);
                 return Response.serverError()
                         .entity(new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
             }
         } catch (TestGridDAOException e) {
-            String msg = "Error occurred while retrieving history for TestPlan : " + testPlanId;
+            String msg = StringUtil.concatStrings(
+                    "Error occurred while retrieving history for TestPlan : ", testPlanId);
             logger.error(msg);
             return Response.serverError()
                     .entity(new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
@@ -334,14 +338,16 @@ public class TestPlanService {
             try {
                 Files.createDirectories(path);
             } catch (IOException e) {
-                throw new TestGridException("Can not create directory to save YAML file of the test-plan " +
-                                            testPlanRequest.getTestPlanName() + ".", e);
+                throw new TestGridException(StringUtil.concatStrings(
+                        "Can not create directory to save YAML file of the test-plan ",
+                        testPlanRequest.getTestPlanName()), e);
             }
         }
 
         try {
             //Add file name to previous path.
-            path = Paths.get(path.toString(), testPlanRequest.getTestPlanName() + ".yaml");
+            path = Paths.get(path.toString(),
+                    StringUtil.concatStrings(testPlanRequest.getTestPlanName(), ".yaml"));
 
             if (!Files.exists(path)) {
                 DumperOptions options = new DumperOptions();
@@ -350,11 +356,12 @@ public class TestPlanService {
                 String string = yaml.dump(testPlanRequest);
                 Files.write(path, string.getBytes(Charset.defaultCharset()));
             } else {
-                throw new TestGridException("YAML file already exists for " + testPlanRequest.getTestPlanName() + ".");
+                throw new TestGridException(StringUtil.concatStrings(
+                        "YAML file already exists for ", testPlanRequest.getTestPlanName()));
             }
         } catch (IOException e) {
-            throw new TestGridException("Error occurred when writing YAML file for test-plan " +
-                    testPlanRequest.getTestPlanName() + ".", e);
+            throw new TestGridException(StringUtil.concatStrings(
+                    "Error occurred when writing YAML file for test-plan ", testPlanRequest.getTestPlanName()), e);
         }
     }
 

@@ -19,6 +19,7 @@
 package org.wso2.testgrid.web.utils;
 
 import org.wso2.testgrid.common.exception.TestGridException;
+import org.wso2.testgrid.common.util.StringUtil;
 import org.wso2.testgrid.common.util.TestGridUtil;
 
 import java.io.IOException;
@@ -60,10 +61,12 @@ public class ConfigurationContext {
                 properties.load(inputStream);
                 return properties.getProperty(property);
             } catch (IOException e) {
-                throw new TestGridException("Can not read property " + property + " in property file.");
+                throw new TestGridException(StringUtil.concatStrings(
+                        "Can not read property ", property, " in property file."));
             }
         } else {
-            throw new TestGridException("Can not get property " + property + " .Property file is null.");
+            throw new TestGridException(StringUtil.concatStrings(
+                    "Can not get property ", property, " .Property file is null."));
         }
     }
 }

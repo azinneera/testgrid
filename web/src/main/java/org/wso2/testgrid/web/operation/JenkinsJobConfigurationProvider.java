@@ -21,6 +21,7 @@ package org.wso2.testgrid.web.operation;
 import org.apache.hc.client5.http.fluent.Content;
 import org.apache.hc.client5.http.fluent.Request;
 import org.wso2.testgrid.common.exception.TestGridException;
+import org.wso2.testgrid.common.util.StringUtil;
 import org.wso2.testgrid.web.bean.TestPlanRequest;
 import org.wso2.testgrid.web.utils.ConfigurationContext;
 import org.wso2.testgrid.web.utils.Constants;
@@ -50,12 +51,18 @@ public class JenkinsJobConfigurationProvider {
                 {Constants.PRODUCT_NAME, testPlanRequest.getTestPlanName()},
                 {Constants.PRODUCT_VERSION, "deprecated"}, //Version and channel is planned to be removed from TestGrid.
                 {Constants.PRODUCT_CHANNEL, "deprecated"},
-                {Constants.INFRASTRUCTURE_REPO, "\"" + testPlanRequest.getInfrastructure().getRepository() + "\""},
-                {Constants.DEPLOYMENT_REPO, "\"" + testPlanRequest.getDeployment().getRepository() + "\""},
-                {Constants.SCENARIO_REPO, "\"" + testPlanRequest.getScenarios().getRepository() + "\""},
-                {Constants.INFRA_LOCATION, "\"" + testPlanRequest.getInfrastructure().getRepository() + "\""},
-                {Constants.DEPLOYMENT_LOCATION, "\"" + testPlanRequest.getDeployment().getRepository() + "\""},
-                {Constants.SCENARIOS_LOCATION, "\"" + testPlanRequest.getScenarios().getRepository() + "\""}
+                {Constants.INFRASTRUCTURE_REPO, StringUtil.concatStrings(
+                        "\"", testPlanRequest.getInfrastructure().getRepository(), "\"")},
+                {Constants.DEPLOYMENT_REPO, StringUtil.concatStrings(
+                        "\"", testPlanRequest.getDeployment().getRepository(), "\"")},
+                {Constants.SCENARIO_REPO, StringUtil.concatStrings(
+                        "\"", testPlanRequest.getScenarios().getRepository(), "\"")},
+                {Constants.INFRA_LOCATION, StringUtil.concatStrings(
+                        "\"", testPlanRequest.getInfrastructure().getRepository(), "\"")},
+                {Constants.DEPLOYMENT_LOCATION, StringUtil.concatStrings(
+                        "\"", testPlanRequest.getDeployment().getRepository(), "\"")},
+                {Constants.SCENARIOS_LOCATION, StringUtil.concatStrings(
+                        "\"", testPlanRequest.getScenarios().getRepository(), "\"")}
         };
         return mergeTemplate(template, replacements);
     }
@@ -66,11 +73,14 @@ public class JenkinsJobConfigurationProvider {
      */
     private String retrieveConfigXmlFromJenkins() throws IOException, TestGridException {
         try {
+            String requestURI = StringUtil.concatStrings(
+                    ConfigurationContext.getProperty(Constants.JENKINS_HOST), JENKINS_TEMPLATE_JOB_URI);
+            String requestHeader = StringUtil.concatStrings(
+                    "Basic ", ConfigurationContext.getProperty(Constants.JENKINS_USER_AUTH_KEY));
             Content content =  Request.
-                    Get(ConfigurationContext.getProperty(Constants.JENKINS_HOST) + JENKINS_TEMPLATE_JOB_URI)
+                    Get(requestURI)
                     .addHeader(HttpHeaders.USER_AGENT, USER_AGENT)
-                    .addHeader(HttpHeaders.AUTHORIZATION, "Basic " +
-                            ConfigurationContext.getProperty(Constants.JENKINS_USER_AUTH_KEY))
+                    .addHeader(HttpHeaders.AUTHORIZATION, requestHeader)
                     .execute().returnContent();
             if (content != null) {
                 return content.asString().trim();
@@ -78,7 +88,8 @@ public class JenkinsJobConfigurationProvider {
                 throw new TestGridException("Configuration file received for Jenkins template job is null.");
             }
         } catch (IOException e) {
-            throw new IOException("Request failed while accessing Jenkins template job: " + e.getMessage(), e);
+            throw new IOException(StringUtil.concatStrings(
+                    "Request failed while accessing Jenkins template job: ", e.getMessage()), e);
         }
     }
 

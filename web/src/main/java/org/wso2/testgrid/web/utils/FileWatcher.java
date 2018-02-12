@@ -56,8 +56,8 @@ public abstract class FileWatcher implements Runnable {
         // This is always a folder
         this.folderPath = watchFile.getParent();
         if (this.folderPath == null) {
-            throw new FileWatcherException("The path provided do not have a parent. Please provide to complete " +
-                                           "path to the file.");
+            throw new FileWatcherException(
+                    "The path provided do not have a parent. Please provide to complete path to the file.");
         }
 
         // Keep this relative to the watched folder

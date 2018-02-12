@@ -18,6 +18,7 @@
 package org.wso2.testgrid.web.bean;
 
 import org.wso2.testgrid.common.Status;
+import org.wso2.testgrid.common.util.StringUtil;
 
 /**
  * Bean class for managing information related to scenario execution.
@@ -95,12 +96,13 @@ public class ScenarioSummary {
 
     @Override
     public String toString() {
-        return "ScenarioSummary{" +
-               "scenarioName='" + scenarioName + '\'' +
-               ", totalSuccess='" + totalSuccess + '\'' +
-               ", totalFail='" + totalFail + '\'' +
-               ", successPercentage='" + successPercentage + "%\'" +
-               ", scenarioStatus='" + scenarioStatus + "\'" +
-               '}';
+        return StringUtil.concatStrings(
+                "ScenarioSummary{",
+               "scenarioName='", scenarioName, '\'',
+               ", totalSuccess='", totalSuccess, '\'',
+               ", totalFail='", totalFail, '\'',
+               ", successPercentage='", successPercentage, "%\'",
+               ", scenarioStatus='", scenarioStatus, "\'",
+               '}');
     }
 }

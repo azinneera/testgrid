@@ -17,6 +17,8 @@
  */
 package org.wso2.testgrid.web.bean;
 
+import org.wso2.testgrid.common.util.StringUtil;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -62,9 +64,10 @@ public class TestExecutionSummary {
 
     @Override
     public String toString() {
-        return "TestExecutionSummary{" +
-               "scenarioSummaries=" + scenarioSummaries +
-               "scenarioTestCaseEntries=" + scenarioTestCaseEntries +
-               '}';
+        return StringUtil.concatStrings(
+                "TestExecutionSummary{",
+               "scenarioSummaries=", scenarioSummaries,
+               "scenarioTestCaseEntries=", scenarioTestCaseEntries,
+               '}');
     }
 }

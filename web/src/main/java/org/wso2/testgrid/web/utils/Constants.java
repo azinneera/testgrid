@@ -19,6 +19,7 @@
 package org.wso2.testgrid.web.utils;
 
 import org.wso2.testgrid.common.TestGridConstants;
+import org.wso2.testgrid.common.util.StringUtil;
 
 /**
  * This class will handle all the constants in the web-app.
@@ -46,9 +47,9 @@ public class Constants extends TestGridConstants {
     public static final String SCENARIOS_LOCATION = "$scenariosLocation";
 
     /* Constants relates to SSO configurations. */
-    public static final String LOGIN_URI = WEBAPP_CONTEXT + "/login";
-    public static final String STATIC_DATA_URI = WEBAPP_CONTEXT + "/static";
-    public static final String BACKEND_APIS_URI = WEBAPP_CONTEXT + "/api";
+    public static final String LOGIN_URI = StringUtil.concatStrings(WEBAPP_CONTEXT, "/login");
+    public static final String STATIC_DATA_URI = StringUtil.concatStrings(WEBAPP_CONTEXT, "/static");
+    public static final String BACKEND_APIS_URI = StringUtil.concatStrings(WEBAPP_CONTEXT, "/api");
     public static final String JKS_FILE_NAME = "wso2carbon.jks";
     public static final String SSO_DIRECTORY = "SSO";
     public static final String SSO_LOGIN_URL = "SSO_LOGIN_URL";

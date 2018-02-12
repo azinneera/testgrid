@@ -17,6 +17,8 @@
  */
 package org.wso2.testgrid.web.bean;
 
+import org.wso2.testgrid.common.util.StringUtil;
+
 /**
  * Bean class for managing information related to test case.
  *
@@ -70,10 +72,11 @@ public class TestCaseEntry {
 
     @Override
     public String toString() {
-        return "TestCaseEntry{" +
-               "testCase='" + testCase + '\'' +
-               ", failureMessage='" + failureMessage + '\'' +
-               ", isTestSuccess='" + isTestSuccess + '\'' +
-               '}';
+        return StringUtil.concatStrings(
+                "TestCaseEntry{",
+               "testCase='", testCase, '\'',
+               ", failureMessage='", failureMessage, '\'',
+               ", isTestSuccess='", isTestSuccess, '\'',
+               '}');
     }
 }

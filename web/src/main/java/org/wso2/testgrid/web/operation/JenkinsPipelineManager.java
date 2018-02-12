@@ -27,6 +27,7 @@ import org.apache.hc.core5.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.testgrid.common.exception.TestGridException;
+import org.wso2.testgrid.common.util.StringUtil;
 import org.wso2.testgrid.web.utils.ConfigurationContext;
 import org.wso2.testgrid.web.utils.Constants;
 
@@ -48,11 +49,14 @@ public class JenkinsPipelineManager {
      * @return URL to check the status of the new job.
      */
     public String createNewPipelineJob(String configXml, String jobName) throws TestGridException, IOException {
+        String uri = StringUtil.concatStrings(
+                ConfigurationContext.getProperty(Constants.JENKINS_HOST), "/createItem?name=", jobName);
+        String authzHeader = StringUtil.concatStrings(
+                "Basic ", ConfigurationContext.getProperty("JENKINS_USER_AUTH_KEY"));
         Response response = Request
-                .Post(ConfigurationContext.getProperty(Constants.JENKINS_HOST) + "/createItem?name=" + jobName)
+                .Post(uri)
                 .addHeader(HttpHeaders.USER_AGENT, USER_AGENT)
-                .addHeader(HttpHeaders.AUTHORIZATION, "Basic " +
-                        ConfigurationContext.getProperty("JENKINS_USER_AUTH_KEY"))
+                .addHeader(HttpHeaders.AUTHORIZATION, authzHeader)
                 .addHeader(Constants.JENKINS_CRUMB_HEADER_NAME, getCrumb())
                 .addHeader(HttpHeaders.CONTENT_TYPE, "application/xml")
                 .bodyString(configXml, ContentType.APPLICATION_XML)
@@ -60,11 +64,10 @@ public class JenkinsPipelineManager {
         if (response.returnResponse().getCode() == HttpStatus.SC_OK) {
             return buildJobSpecificUrl(jobName);
         } else {
-            logger.error("Jenkins server error for creating job " + jobName + " " +
-                    response.returnResponse().getCode());
-            throw new TestGridException("Can not create new job in Jenkins. Received " +
-                    response.returnResponse().getCode() + " " +
-                    response.returnContent().asString() + ".");
+            logger.error(StringUtil.concatStrings("Jenkins server error for creating job ", jobName, " ",
+                    response.returnResponse().getCode()));
+            throw new TestGridException(StringUtil.concatStrings("Can not create new job in Jenkins. Received ",
+                    response.returnResponse().getCode(), " ", response.returnContent().asString()));
         }
     }
 
@@ -75,11 +78,14 @@ public class JenkinsPipelineManager {
      */
     private String getCrumb() throws IOException, TestGridException {
         try {
+            String uri = StringUtil.concatStrings(ConfigurationContext.getProperty(Constants.JENKINS_HOST),
+                    Constants.JENKINS_CRUMB_ISSUER_URI);
+            String authzHeader = StringUtil.concatStrings("Basic ",
+                    ConfigurationContext.getProperty(Constants.JENKINS_USER_AUTH_KEY));
             String response = Request
-                    .Get(ConfigurationContext.getProperty(Constants.JENKINS_HOST) + Constants.JENKINS_CRUMB_ISSUER_URI)
+                    .Get(uri)
                     .addHeader(HttpHeaders.USER_AGENT, USER_AGENT)
-                    .addHeader(HttpHeaders.AUTHORIZATION, "Basic " +
-                            ConfigurationContext.getProperty(Constants.JENKINS_USER_AUTH_KEY))
+                    .addHeader(HttpHeaders.AUTHORIZATION, authzHeader)
                     .execute().returnContent().asString().trim();
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readValue(response, JsonNode.class);
@@ -89,7 +95,8 @@ public class JenkinsPipelineManager {
                 throw new TestGridException("Crumb value is null. Can not continue.");
             }
         } catch (IOException e) {
-            throw new TestGridException("Can not get crumb value from Jenkins " + e.getMessage(), e);
+            throw new TestGridException(StringUtil.concatStrings(
+                    "Can not get crumb value from Jenkins ", e.getMessage()));
         }
     }
 
@@ -99,7 +106,7 @@ public class JenkinsPipelineManager {
      * @return URL of the job.
      */
     private String buildJobSpecificUrl(String jobName) throws TestGridException {
-        return ConfigurationContext.getProperty(Constants.JENKINS_HOST) + Constants.BLUE_OCEAN_URI
-                + "/" + jobName + "/activity";
+        return StringUtil.concatStrings(ConfigurationContext.getProperty(Constants.JENKINS_HOST),
+                Constants.BLUE_OCEAN_URI, "/", jobName, "/activity");
     }
 }

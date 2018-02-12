@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.testgrid.common.TestCase;
 import org.wso2.testgrid.common.TestScenario;
+import org.wso2.testgrid.common.util.StringUtil;
 import org.wso2.testgrid.dao.TestGridDAOException;
 import org.wso2.testgrid.dao.uow.TestCaseUOW;
 import org.wso2.testgrid.dao.uow.TestScenarioUOW;
@@ -60,12 +61,14 @@ public class TestCaseService {
                 return Response.status(Response.Status.OK).entity(APIUtil.getTestCaseBeans(testScenario.get().
                         getTestCases())).build();
             } else {
+                String msg = StringUtil.concatStrings(
+                        "Unable to find the requested TestCases for TestScenario id : ", testScenarioId);
                 return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse.ErrorResponseBuilder().
-                        setMessage("Unable to find the requested TestCases for TestScenario id : '" + testScenarioId
-                                + "'").build()).build();
+                        setMessage(msg).build()).build();
             }
         } catch (TestGridDAOException e) {
-            String msg = "Error occurred while fetching the TestCases for TestScenario id : '" + testScenarioId + "'";
+            String msg = StringUtil.concatStrings(
+                    "Error occurred while fetching the TestCases for TestScenario id : ", testScenarioId);
             logger.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();
@@ -86,11 +89,12 @@ public class TestCaseService {
             if (testCase.isPresent()) {
                 return Response.status(Response.Status.OK).entity(APIUtil.getTestCaseBean(testCase.get())).build();
             } else {
+                String msg = StringUtil.concatStrings("Unable to find the requested TestCase by id : ", id);
                 return Response.status(Response.Status.NOT_FOUND).entity(new ErrorResponse.ErrorResponseBuilder().
-                        setMessage("Unable to find the requested TestCase by id : '" + id + "'").build()).build();
+                        setMessage(msg).build()).build();
             }
         } catch (TestGridDAOException e) {
-            String msg = "Error occurred while fetching the TestCase by id : '" + id + "'";
+            String msg = StringUtil.concatStrings("Error occurred while fetching the TestCase by id : ", id);
             logger.error(msg, e);
             return Response.serverError().entity(
                     new ErrorResponse.ErrorResponseBuilder().setMessage(msg).build()).build();

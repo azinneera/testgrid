@@ -18,6 +18,7 @@
 package org.wso2.testgrid.web.bean;
 
 import org.apache.commons.io.IOUtils;
+import org.wso2.testgrid.common.util.StringUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -132,7 +133,7 @@ public class TruncatedInputStreamData {
      */
     private String humanReadableByteCount(long bytes) {
         if (bytes < BYTES_PER_KB) {
-            return bytes + " B";
+            return StringUtil.concatStrings(bytes, " B");
         }
         int exp = (int) (Math.log(bytes) / Math.log(BYTES_PER_KB));
         String pre = "KMGTPE".charAt(exp - 1) + "i";
