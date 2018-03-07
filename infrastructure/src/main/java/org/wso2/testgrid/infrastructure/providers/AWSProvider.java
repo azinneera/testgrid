@@ -138,8 +138,8 @@ public class AWSProvider implements InfrastructureProvider {
         }
     }
 
-        private InfrastructureProvisionResult doProvision(InfrastructureConfig infrastructureConfig,
-            String stackName, String infraRepoDir) throws TestGridInfrastructureException {
+    private InfrastructureProvisionResult doProvision(InfrastructureConfig infrastructureConfig,
+                                                      String stackName, String infraRepoDir) throws TestGridInfrastructureException {
         String region = infrastructureConfig.getParameters().getProperty(AWS_REGION_PARAMETER);
         AmazonCloudFormation cloudFormation = AmazonCloudFormationClientBuilder.standard()
                 .withCredentials(new EnvironmentVariableCredentialsProvider())
@@ -210,9 +210,7 @@ public class AWSProvider implements InfrastructureProvider {
             return result;
         } catch (WaiterUnrecoverableException e) {
             throw new TestGridInfrastructureException(StringUtil.concatStrings("Error while waiting for stack : "
-                    , stackName, " to complete. One or more resources transitioned into a failure/unexpected state.",
-                    "Stacks may contain duplicated resource names. ",
-                    "Please delete redundant resources/Stacks and try again."), e);
+                    , stackName, " to complete"), e);
         } catch (IOException e) {
             throw new TestGridInfrastructureException("Error occurred while Reading CloudFormation script", e);
         }
@@ -269,8 +267,8 @@ public class AWSProvider implements InfrastructureProvider {
                             .getParameterKey())).findAny();
             if (!scriptParameter.isPresent() && expected.getParameterKey().equals("AMI")) {
                 Parameter awsParameter;
-                    awsParameter = new Parameter().withParameterKey(expected.getParameterKey())
-                            .withParameterValue(getAMIParameterValue(infrastructureConfig));
+                awsParameter = new Parameter().withParameterKey(expected.getParameterKey())
+                        .withParameterValue(getAMIParameterValue(infrastructureConfig));
                 cfCompatibleParameters.add(awsParameter);
             }
 
