@@ -40,10 +40,10 @@ public abstract class TestExecutor {
      * Executes a test based on the given script and the deployment.
      *
      * @param script                   test script
-     * @param deploymentCreationResult deployment to run the test script on
+     * @param inputParameters deployment to run the test script on
      * @throws TestAutomationException thrown when error on executing the given test script
      */
-    public abstract void execute(String script, DeploymentCreationResult deploymentCreationResult)
+    public abstract void execute(String script, String inputParameters)
             throws TestAutomationException;
 
     /**

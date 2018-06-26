@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.testgrid.automation.executor.TestExecutor;
 import org.wso2.testgrid.automation.executor.TestExecutorFactory;
-import org.wso2.testgrid.common.DeploymentCreationResult;
 import org.wso2.testgrid.common.TestScenario;
 import org.wso2.testgrid.common.util.StringUtil;
 
@@ -136,16 +135,16 @@ public class Test {
      * Executes the test for the given test location and deployment.
      *
      * @param testLocation location of the tests
-     * @param input        Output of the previous (ie. deployment) build step.
+     * @param inputParameters        Output of the previous (ie. deployment) build step.
      * @throws TestAutomationException thrown when error on executing tests
      */
-    public TestScenario execute(String testLocation, DeploymentCreationResult input)
+    public TestScenario execute(String testLocation, String inputParameters)
             throws TestAutomationException {
         testExecutor.init(testLocation, getTestName(), testScenario);
 
         try {
             for (String script : scripts) {
-                testExecutor.execute(script, input);
+                testExecutor.execute(script, inputParameters);
             }
         } catch (Exception e) {
             // we need to continue and execute the post script to destroy any scenario specific services.

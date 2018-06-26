@@ -29,7 +29,6 @@ import org.wso2.testgrid.automation.Test;
 import org.wso2.testgrid.automation.TestAutomationException;
 import org.wso2.testgrid.automation.reader.TestReader;
 import org.wso2.testgrid.automation.reader.TestReaderFactory;
-import org.wso2.testgrid.common.DeploymentCreationResult;
 import org.wso2.testgrid.common.Status;
 import org.wso2.testgrid.common.TestGridConstants;
 import org.wso2.testgrid.common.TestPlan;
@@ -37,6 +36,7 @@ import org.wso2.testgrid.common.TestScenario;
 import org.wso2.testgrid.common.exception.TestGridException;
 import org.wso2.testgrid.common.util.FileUtil;
 import org.wso2.testgrid.common.util.StringUtil;
+import org.wso2.testgrid.common.util.TestGridUtil;
 import org.wso2.testgrid.core.exception.ScenarioExecutorException;
 import org.wso2.testgrid.dao.TestGridDAOException;
 import org.wso2.testgrid.dao.uow.TestCaseUOW;
@@ -83,11 +83,10 @@ public class ScenarioExecutor {
      * This method executes a given TestScenario.
      *
      * @param testScenario             an instance of TestScenario in which the tests should be executed.
-     * @param deploymentCreationResult the deployment creation output.
      * @param testPlan                 test plan associated with the test scenario.
      * @throws ScenarioExecutorException If something goes wrong while executing the TestScenario.
      */
-    public void execute(TestScenario testScenario, DeploymentCreationResult deploymentCreationResult, TestPlan testPlan)
+    public void execute(TestScenario testScenario, TestPlan testPlan)
             throws ScenarioExecutorException {
         try {
             // Run test scenario.
@@ -112,9 +111,15 @@ public class ScenarioExecutor {
                         + testLocation);
                 testScenario.setStatus(Status.ERROR);
             } else {
+                Path deploymentOutputsFile = Paths.get(
+                        TestGridUtil.getTestRunWorkspace(testPlan, false).toString(),
+                        TestGridConstants.DEPLOYMENT_OUTPUTS_FILE);
+                if (!deploymentOutputsFile.toFile().exists()) {
+                    throw new ScenarioExecutorException(deploymentOutputsFile + " file not found.");
+                }
                 for (Test test : tests) {
                     logger.info(StringUtil.concatStrings("Executing ", test.getTestName(), " Test"));
-                    test.execute(testLocation, deploymentCreationResult);
+                    test.execute(testLocation, deploymentOutputsFile.toString());
                     logger.info("---------------------------------------");
                 }
             }
@@ -125,6 +130,8 @@ public class ScenarioExecutor {
             throw new ScenarioExecutorException(StringUtil
                     .concatStrings("Exception occurred while running the Tests for Solution Pattern '",
                             testScenario.getName(), "'"), e);
+        } catch (TestGridException e) {
+            throw new ScenarioExecutorException("Error occurred while retrieving deployment outputs file.", e);
         }
     }
 

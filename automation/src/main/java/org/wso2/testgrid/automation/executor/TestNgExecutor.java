@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.TestNG;
 import org.wso2.testgrid.automation.TestAutomationException;
-import org.wso2.testgrid.common.DeploymentCreationResult;
 import org.wso2.testgrid.common.TestScenario;
 
 import java.io.File;
@@ -40,7 +39,7 @@ public class TestNgExecutor extends TestExecutor {
     private String testsLocation;
 
     @Override
-    public void execute(String jarFilePath, DeploymentCreationResult deploymentCreationResult) {
+    public void execute(String jarFilePath, String inputParameters) {
         File jarFile = new File(jarFilePath);
         String jarName = jarFile.getName().substring(0, jarFile.getName().lastIndexOf("."));
 

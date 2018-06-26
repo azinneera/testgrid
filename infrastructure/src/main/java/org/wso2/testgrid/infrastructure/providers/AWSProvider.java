@@ -47,6 +47,7 @@ import org.wso2.testgrid.common.TimeOutBuilder;
 import org.wso2.testgrid.common.config.ConfigurationContext;
 import org.wso2.testgrid.common.config.InfrastructureConfig;
 import org.wso2.testgrid.common.config.Script;
+import org.wso2.testgrid.common.exception.TestGridException;
 import org.wso2.testgrid.common.exception.TestGridInfrastructureException;
 import org.wso2.testgrid.common.util.LambdaExceptionUtils;
 import org.wso2.testgrid.common.util.StringUtil;
@@ -55,7 +56,9 @@ import org.wso2.testgrid.infrastructure.CloudFormationScriptPreprocessor;
 import org.wso2.testgrid.infrastructure.providers.aws.AMIMapper;
 import org.wso2.testgrid.infrastructure.providers.aws.StackCreationWaiter;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -217,11 +220,22 @@ public class AWSProvider implements InfrastructureProvider {
             hosts.add(tomcatHost);
             hosts.add(tomcatPort);
             for (Stack st : describeStacksResult.getStacks()) {
+                Properties deploymentInfo = new Properties();
                 for (Output output : st.getOutputs()) {
                     Host host = new Host();
                     host.setIp(output.getOutputValue());
                     host.setLabel(output.getOutputKey());
                     hosts.add(host);
+                    deploymentInfo.setProperty(output.getOutputKey(), output.getOutputValue());
+                }
+
+                // Write deployment outputs to a file
+                final String workspace = TestGridUtil.getTestRunWorkspace(testPlan, false).toString();
+                try (OutputStream outputStream = new FileOutputStream(
+                        Paths.get(workspace, TestGridConstants.DEPLOYMENT_OUTPUTS_FILE).toString(), true)) {
+                    deploymentInfo.store(outputStream, null);
+                } catch (IOException e) {
+                    throw new TestGridInfrastructureException("Error occurred while retrieving the workspace", e);
                 }
             }
             logger.info("Created a CloudFormation Stack with the name :" + stackRequest.getStackName());
@@ -236,6 +250,8 @@ public class AWSProvider implements InfrastructureProvider {
 
         } catch (IOException e) {
             throw new TestGridInfrastructureException("Error occurred while Reading CloudFormation script", e);
+        } catch (TestGridException e) {
+            throw new TestGridInfrastructureException("Error occurred while retrieving the workspace.", e);
         }
     }
 

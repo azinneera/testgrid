@@ -252,7 +252,16 @@ public final class TestGridUtil {
             dirPrefix = getTestGridHomePath();
         }
 
-        return Paths.get(dirPrefix, productDir, deploymentDir, infraDir, String.valueOf(testRunNumber));
+        Path workspace = Paths.get(dirPrefix, productDir, deploymentDir, infraDir, String.valueOf(testRunNumber));
+        if (!Files.exists(workspace)) {
+            try {
+                Files.createDirectories(workspace);
+            } catch (IOException e) {
+                throw new TestGridException(StringUtil.concatStrings(
+                        "Error occurred while creating test run workspace: ", workspace, "."), e);
+            }
+        }
+        return workspace;
     }
 
     /**

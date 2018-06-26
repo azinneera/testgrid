@@ -21,8 +21,6 @@ package org.wso2.testgrid.automation.executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.testgrid.automation.TestAutomationException;
-import org.wso2.testgrid.common.DeploymentCreationResult;
-import org.wso2.testgrid.common.Host;
 import org.wso2.testgrid.common.ShellExecutor;
 import org.wso2.testgrid.common.Status;
 import org.wso2.testgrid.common.TestScenario;
@@ -31,8 +29,6 @@ import org.wso2.testgrid.common.util.EnvironmentUtil;
 import org.wso2.testgrid.common.util.StringUtil;
 
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Responsible for performing the tasks related to execution of single JMeter solution.
@@ -55,7 +51,7 @@ public class JMeterExecutor extends TestExecutor {
     }
 
     @Override
-    public void execute(String script, DeploymentCreationResult deploymentCreationResult)
+    public void execute(String script, String inputParameters)
             throws TestAutomationException {
         try {
             String jmeterHome = EnvironmentUtil.getSystemVariableValue(JMETER_HOME);
@@ -66,12 +62,7 @@ public class JMeterExecutor extends TestExecutor {
             }
 
             ShellExecutor shellExecutor = new ShellExecutor(Paths.get(testLocation));
-            Map<String, String> environment = new HashMap<>();
-
-            for (Host host : deploymentCreationResult.getHosts()) {
-                environment.put(host.getLabel(), host.getIp());
-            }
-            int exitCode = shellExecutor.executeCommand("bash " + script, environment);
+            int exitCode = shellExecutor.executeCommand("bash " + script + " --deployment-outputs=" + inputParameters);
             if (exitCode > 0) {
                 logger.error(StringUtil.concatStrings("Error occurred while executing the test: ", testName, ", at: ",
                         testScenario.getDir(), ". Script exited with a status code of ", exitCode));

@@ -50,6 +50,7 @@ import org.wso2.testgrid.common.TestPlan;
 import org.wso2.testgrid.common.config.InfrastructureConfig;
 import org.wso2.testgrid.common.config.ScenarioConfig;
 import org.wso2.testgrid.common.config.Script;
+import org.wso2.testgrid.common.util.TestGridUtil;
 import org.wso2.testgrid.infrastructure.providers.AWSProvider;
 import org.wso2.testgrid.infrastructure.providers.aws.AMIMapper;
 import org.wso2.testgrid.infrastructure.providers.aws.StackCreationWaiter;
@@ -73,7 +74,7 @@ import java.util.Set;
 @PowerMockIgnore({"javax.net.ssl.*", "javax.security.*"})
 @PrepareForTest({
                         AWSProvider.class, AmazonCloudFormationClientBuilder.class
-                        , AmazonCloudFormation.class, AwsClientBuilder.class
+                        , AmazonCloudFormation.class, AwsClientBuilder.class, TestGridUtil.class
                 })
 public class AWSProviderTest extends PowerMockTestCase {
 
@@ -186,8 +187,14 @@ public class AWSProviderTest extends PowerMockTestCase {
         awsProvider.init(testPlan);
         testPlan.setInfrastructureConfig(infrastructureConfig);
         testPlan.setInfrastructureRepository(resourcePath.getAbsolutePath());
-        InfrastructureProvisionResult provisionResult = awsProvider
-                .provision(testPlan);
+
+        PowerMockito.mockStatic(TestGridUtil.class);
+        PowerMockito.when(TestGridUtil.getTestRunWorkspace(testPlan, false)).
+                thenReturn(Paths.get("src/test/resources"));
+        PowerMockito.when(TestGridUtil.getConfigFilePath()).
+                thenReturn(Paths.get("src/test/resources/config.properties"));
+
+        InfrastructureProvisionResult provisionResult = awsProvider.provision(testPlan);
 
         Assert.assertNotNull(provisionResult);
         Assert.assertEquals(provisionResult.getHosts().size(), 3);

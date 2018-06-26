@@ -248,7 +248,7 @@ public class TestPlanExecutor {
 
             for (TestScenario testScenario : testPlan.getTestScenarios()) {
                 try {
-                    scenarioExecutor.execute(testScenario, deploymentCreationResult, testPlan);
+                    scenarioExecutor.execute(testScenario, testPlan);
                     Optional<ResultParser> parser = ResultParserFactory.getParser(testPlan, testScenario);
                     if (parser.isPresent()) {
                         try {
