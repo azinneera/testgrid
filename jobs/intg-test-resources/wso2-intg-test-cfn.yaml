@@ -189,30 +189,6 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Designer':
         id: abbdb5e8-f28b-4bc6-8b63-da9595b59c4a
-  WSO2EnvDBSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroup'
-    Properties:
-      GroupDescription: Security group for RDS
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 3306
-          ToPort: 3306
-          SourceSecurityGroupName: !Ref WSO2InstanceSecurityGroup
-        - IpProtocol: tcp
-          FromPort: 5432
-          ToPort: 5432
-          SourceSecurityGroupName: !Ref WSO2InstanceSecurityGroup
-        - IpProtocol: tcp
-          FromPort: 1433
-          ToPort: 1433
-          SourceSecurityGroupName: !Ref WSO2InstanceSecurityGroup
-        - IpProtocol: tcp
-          FromPort: 1521
-          ToPort: 1521
-          SourceSecurityGroupName: !Ref WSO2InstanceSecurityGroup
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: d0dcc88f-97f7-4d80-901a-f746d372a295
   WSO2UnixInstance:
     Type: 'AWS::EC2::Instance'
     Condition: 'IsUnix'
@@ -365,28 +341,6 @@ Resources:
                  }
             }
          }
-  WSO2DBInstance:
-    Type: 'AWS::RDS::DBInstance'
-    Properties:
-      AllocatedStorage: !Ref DBAllocatedStorage
-      DBInstanceClass: !Ref DBClass
-      Engine: !Ref DBEngine
-      EngineVersion: !Ref DBEngineVersion
-      DBInstanceIdentifier: wso2-dbinstance
-      LicenseModel: !FindInMap [DB2Licence, !Ref "DBEngine", license]
-      MasterUsername: !Ref DBUsername
-      MasterUserPassword: !Ref DBPassword
-      AutoMinorVersionUpgrade: false
-      BackupRetentionPeriod: 0
-      VPCSecurityGroups:
-        - !GetAtt WSO2EnvDBSecurityGroup.GroupId
-      AvailabilityZone: !Select
-        - '0'
-        - !GetAZs ''
-    DeletionPolicy: Delete
-    Metadata:
-      'AWS::CloudFormation::Designer':
-        id: 5352b4e9-46ed-4a23-8bdc-bafc3666cbbd
 Outputs:
   WSO2MgtConsoleURL:
     Value: !If [IsUnix, !Sub 'https://${WSO2UnixInstance.PublicDnsName}:9443/carbon', !If [IsWindows, !Sub 'https://${WSO2WindowsInstance.PublicDnsName}:9443/carbon', !Ref 'AWS::NoValue']]
@@ -394,12 +348,6 @@ Outputs:
   WSO2PublicIP:
     Value: !If [IsUnix, !Sub '${WSO2UnixInstance.PublicIp}', !If [IsWindows, !Sub '${WSO2WindowsInstance.PublicIp}', !Ref 'AWS::NoValue']]
     Description: Private IP of the WSO2 Product Instance
-  DatabaseHost:
-    Value: !Sub '${WSO2DBInstance.Endpoint.Address}'
-    Description: Database Host
-  DatabasePort:
-    Value: !Sub '${WSO2DBInstance.Endpoint.Port}'
-    Description: Database Port
   OS:
     Value: !Ref OS
   WSO2InstanceId:
