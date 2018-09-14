@@ -348,6 +348,12 @@ Outputs:
   WSO2PublicIP:
     Value: !If [IsUnix, !Sub '${WSO2UnixInstance.PublicIp}', !If [IsWindows, !Sub '${WSO2WindowsInstance.PublicIp}', !Ref 'AWS::NoValue']]
     Description: Private IP of the WSO2 Product Instance
+  DatabaseHost:
+    Value: "localhost"
+    Description: Database Host
+  DatabasePort:
+    Value: !Sub "3306"
+    Description: Database Port  
   OS:
     Value: !Ref OS
   WSO2InstanceId:
