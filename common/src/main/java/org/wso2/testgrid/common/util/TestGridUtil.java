@@ -35,6 +35,8 @@ import org.wso2.testgrid.common.config.DeploymentConfig;
 import org.wso2.testgrid.common.config.InfrastructureConfig;
 import org.wso2.testgrid.common.config.Script;
 import org.wso2.testgrid.common.exception.CommandExecutionException;
+import org.wso2.testgrid.common.infrastructure.InfrastructureParameter;
+import org.wso2.testgrid.common.infrastructure.InfrastructureValueSet;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -51,7 +53,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -130,6 +134,38 @@ public final class TestGridUtil {
             logger.error("Error while parsing infra parameters", e);
             return Collections.emptyMap();
         }
+    }
+
+    /**
+     * Read the infra params from the infrastructure_parameter db table, and return
+     * the list of infra params used in the given test plan.
+     * 
+     * @param valueSets infrastructure parameter value sets
+     * @param testPlan test plan to get infrastructure parameters from
+     * @return a list of infrastructure parameters
+     */
+    public static List<InfrastructureParameter> getInfraParamsOfTestPlan(
+            Set<InfrastructureValueSet> valueSets, TestPlan testPlan) {
+        List<InfrastructureParameter> infraParams = new ArrayList<>();
+        final String infraParameters = testPlan.getInfraParameters();
+
+        final Map<String, String> infraParamsStr = parseInfraParametersString(infraParameters);
+        for (InfrastructureValueSet valueSet : valueSets) {
+            final String infraName = infraParamsStr.get(valueSet.getType());
+            final Optional<InfrastructureParameter> infraParam = valueSet.getValues().stream()
+                    .filter(param -> param.getName().equals(infraName) || param
+                            .getProcessedSubInfrastructureParameters().stream().anyMatch(sip -> sip.getName()
+                                    .equals(infraName)))
+                    .findAny(); //todo simplify the logic after infra_parameter table fix
+            if (infraParam.isPresent()) {
+                infraParam.get().transform();
+                infraParams.add(infraParam.get());
+            } else {
+                logger.warn("Inconsistent state: Could not find InfrastructureParameter db entry for the " +
+                        infraName + ". ValueSet: " + valueSet);
+            }
+        }
+        return infraParams;
     }
 
     /**

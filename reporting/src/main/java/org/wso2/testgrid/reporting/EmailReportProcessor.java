@@ -27,7 +27,9 @@ import org.wso2.testgrid.common.TestPlan;
 import org.wso2.testgrid.common.config.ConfigurationContext;
 import org.wso2.testgrid.common.config.PropertyFileReader;
 import org.wso2.testgrid.common.infrastructure.InfrastructureParameter;
+import org.wso2.testgrid.common.infrastructure.InfrastructureValueSet;
 import org.wso2.testgrid.common.util.TestGridUtil;
+import org.wso2.testgrid.dao.TestGridDAOException;
 import org.wso2.testgrid.dao.uow.InfrastructureParameterUOW;
 import org.wso2.testgrid.dao.uow.TestPlanUOW;
 import org.wso2.testgrid.reporting.model.email.TPResultSection;
@@ -38,7 +40,7 @@ import org.wso2.testgrid.reporting.surefire.TestResult;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -228,34 +230,28 @@ public class EmailReportProcessor {
     /**
      * Get the tested infrastructures as a html string content.
      *
-     * @param testCaseInfraSummaryMap the summary map
+     * @param testPlans executed test plans
      */
-    public String getTestedInfrastructures(Map<String, InfrastructureBuildStatus> testCaseInfraSummaryMap) {
-        final Set<InfrastructureParameter> s = testCaseInfraSummaryMap.values().stream()
-                .map(InfrastructureBuildStatus::getSuccessInfra)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-        final Set<InfrastructureParameter> f = testCaseInfraSummaryMap.values().stream()
-                .map(InfrastructureBuildStatus::getFailedInfra)
-                .flatMap(Collection::stream)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-        final Set<InfrastructureParameter> u = testCaseInfraSummaryMap.values().stream()
-                .map(InfrastructureBuildStatus::getUnknownInfra)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
-
-        s.addAll(f);
-        s.addAll(u);
-        final Map<String, List<InfrastructureParameter>> infraGroupedByType = s.stream()
-                .collect(Collectors.groupingBy(InfrastructureParameter::getType));
-        final String infraStr = "{<br/>" + infraGroupedByType.entrySet().stream()
-                .map(entry -> "&nbsp;&nbsp;<b>" + entry.getKey() + "</b> : " +
-                        entry.getValue().stream()
-                                .map(InfrastructureParameter::getName)
-                                .collect(Collectors.joining(", ")))
-                .collect(Collectors.joining(", <br/>")) + "<br/>}";
-        return infraStr;
+    public String getTestedInfrastructures(List<TestPlan> testPlans) throws TestGridDAOException {
+        final Set<InfrastructureValueSet> infrastructureValueSet = infrastructureParameterUOW.getValueSet();
+        Set<InfrastructureParameter> infraParams;
+        Map<String, List<InfrastructureParameter>> infraMap;
+        List<String> infraStr = new ArrayList<>();
+        for (TestPlan testPlan : testPlans) {
+            if (testPlan.getStatus() != Status.ERROR) {
+                infraParams = new HashSet<>(TestGridUtil.
+                        getInfraParamsOfTestPlan(infrastructureValueSet, testPlan));
+                infraMap = infraParams.stream().collect(Collectors.groupingBy(InfrastructureParameter::getType));
+                infraStr.add("<br/>&nbsp;&nbsp;{" + infraMap.entrySet().stream()
+                        .map(entry -> "&nbsp;&nbsp;<b>" + entry.getKey() + "</b> : " +
+                                entry.getValue().stream()
+                                        .map(InfrastructureParameter::getName)
+                                        .collect(Collectors.joining(", ")))
+                        .collect(Collectors.joining(",")) + "&nbsp;&nbsp;}");
+            }
+        }
+        infraStr.set(infraStr.size() - 1, infraStr.get(infraStr.size() - 1) + "</br>");
+        return infraStr.toString();
 
     }
 }

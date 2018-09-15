@@ -85,6 +85,7 @@ public class TestReportEngine {
     private static final String PERFORMANCE_REPORT_MUSTACHE = "performance_report.mustache";
     private static final String EMAIL_REPORT_MUSTACHE = "email_report.mustache";
     private static final String SUMMARIZED_EMAIL_REPORT_MUSTACHE = "summarized_email_report.mustache";
+    private static final String SUMMARIZED_EMAIL_REPORT_SUCCESS_MUSTACHE = "summarized_email_report_success.mustache";
     private static final String REPORT_TEMPLATE_KEY = "parsedReport";
     private static final String PER_TEST_PLAN_TEMPLATE_KEY = "perTestPlan";
     private static final String PER_TEST_CASE_TEMPLATE_KEY = "perTestCase";
@@ -779,7 +780,12 @@ public class TestReportEngine {
 
         Map<String, InfrastructureBuildStatus> testCaseInfraSummaryMap = emailReportProcessor
                 .getSummaryTable(testPlans);
-        final String testedInfrastructures = emailReportProcessor.getTestedInfrastructures(testCaseInfraSummaryMap);
+        final String testedInfrastructures;
+        try {
+            testedInfrastructures = emailReportProcessor.getTestedInfrastructures(testPlans);
+        } catch (TestGridDAOException e) {
+            throw new ReportingException("Error while getting tested infrastructures.", e);
+        }
         postProcessSummaryTable(testCaseInfraSummaryMap);
 
         logger.info("Generated summary table info: " + testCaseInfraSummaryMap);
@@ -861,11 +867,6 @@ public class TestReportEngine {
 
         List<TestPlan> testPlans = getTestPlansInWorkspace(workspace);
         //start email generation
-        if (!emailReportProcessor.hasFailedTests(testPlans)) {
-            logger.info("Latest build of '" + product.getName() + "' does not contain failed tests. "
-                        + "Hence skipping email-report generation. Total test-plans: " + testPlans.size());
-            return Optional.empty();
-        }
         List<BuildFailureSummary> failureSummary = graphDataProvider.getTestFailureSummary(workspace);
 
         Map<String, Object> results = new HashMap<>();
@@ -889,7 +890,12 @@ public class TestReportEngine {
 
         Map<String, InfrastructureBuildStatus> testCaseInfraSummaryMap = emailReportProcessor
                 .getSummaryTable(testPlans);
-        final String testedInfrastructures = emailReportProcessor.getTestedInfrastructures(testCaseInfraSummaryMap);
+        final String testedInfrastructures;
+        try {
+            testedInfrastructures = emailReportProcessor.getTestedInfrastructures(testPlans);
+        } catch (TestGridDAOException e) {
+            throw new ReportingException("Error while getting tested infrastructures.", e);
+        }
         postProcessSummaryTable(testCaseInfraSummaryMap);
 
         String productName = product.getName();
@@ -915,7 +921,13 @@ public class TestReportEngine {
         results.put("testCaseInfraSummaryTable", testCaseInfraSummaryMap.entrySet());
         results.put("jobName", productName);
         results.put("dashboardURL", dashboardURL);
-        String htmlString = renderer.render(SUMMARIZED_EMAIL_REPORT_MUSTACHE, results);
+
+        String htmlString;
+        if (!emailReportProcessor.hasFailedTests(testPlans)) {
+            htmlString = renderer.render(SUMMARIZED_EMAIL_REPORT_SUCCESS_MUSTACHE, results);
+        } else {
+            htmlString = renderer.render(SUMMARIZED_EMAIL_REPORT_MUSTACHE, results);
+        }
 
         // Write to HTML file
         Path reportPath = Paths.get(workspace, TestGridConstants.TESTGRID_BUILDS_DIR,
