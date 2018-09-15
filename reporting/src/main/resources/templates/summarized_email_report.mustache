@@ -125,6 +125,10 @@
             background-color: limegreen;
         }
 
+        .red-font {
+            color: #cc0000;
+        }
+
     </style>
 </head>
 <body>
@@ -152,6 +156,19 @@
             <div>{{{gitBuildDetails}}}</div>
             <div>Detailed results: <a href="{{dashboardURL}}">{{jobName}} :: TestGrid Dashboard</a></div>
             <div>Tested Infrastructures: <br/> <em>{{{testedInfrastructures}}}</em></div>
+        <br/><span class="testResultSubTitle red-font" align="center">Failed Infrastructures</span><p/>
+            <table class="reportTable" style="border: 0; border-collapse:collapse; table-layout: auto;">
+                <tbody>
+                    {{#failedInfrastructures}}
+                        <tr>
+                            <td style="border: none;"><b>{{key}}</b> - <a href="{{value}}">Download Log File</a></td>
+                            <!--<td style="border: 1px solid black;"><a href="{{value}}">{{value}}</a></td>-->
+                        </tr>
+                    {{/failedInfrastructures}}
+                    {{^failedInfrastructures}}
+                    {{/failedInfrastructures}}
+                </tbody>
+            </table>
             <br/>
             <span class="testResultSubTitle" align="center">Test Result Summary</span>
             <p/><p/>

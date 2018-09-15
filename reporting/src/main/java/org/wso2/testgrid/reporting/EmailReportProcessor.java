@@ -27,7 +27,9 @@ import org.wso2.testgrid.common.TestPlan;
 import org.wso2.testgrid.common.config.ConfigurationContext;
 import org.wso2.testgrid.common.config.PropertyFileReader;
 import org.wso2.testgrid.common.infrastructure.InfrastructureParameter;
+import org.wso2.testgrid.common.infrastructure.InfrastructureValueSet;
 import org.wso2.testgrid.common.util.TestGridUtil;
+import org.wso2.testgrid.dao.TestGridDAOException;
 import org.wso2.testgrid.dao.uow.InfrastructureParameterUOW;
 import org.wso2.testgrid.dao.uow.TestPlanUOW;
 import org.wso2.testgrid.reporting.model.email.TPResultSection;
@@ -39,6 +41,8 @@ import org.wso2.testgrid.reporting.surefire.TestResult;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -258,5 +262,29 @@ public class EmailReportProcessor {
                 .collect(Collectors.joining(", <br/>")) + "<br/>}";
         return infraStr;
 
+    }
+
+    public Map<String, String> getErroneousInfrastructures(List<TestPlan> testPlans) throws TestGridDAOException {
+        Map<String, String> erroneousInfraMap = new HashMap<>();
+        final Set<InfrastructureValueSet> infrastructureValueSet = infrastructureParameterUOW.getValueSet();
+        Set<InfrastructureParameter> infraParams;
+        Map<String, List<InfrastructureParameter>> infraMap;
+        String infraStr;
+        for (TestPlan testPlan : testPlans) {
+            String logDownloadPath = TestGridUtil.getDashboardURLFor(testPlan);
+            if (testPlan.getStatus() == Status.ERROR) {
+                infraParams = new HashSet<>(TestGridUtil.
+                        getInfraParamsOfTestPlan(infrastructureValueSet, testPlan));
+                infraMap = infraParams.stream().collect(Collectors.groupingBy(InfrastructureParameter::getType));
+                infraStr = infraMap.entrySet().stream()
+                        .map(entry -> entry.getKey() + " : " +
+                                entry.getValue().stream()
+                                        .map(InfrastructureParameter::getName)
+                                        .collect(Collectors.joining(", ")))
+                        .collect(Collectors.joining(", "));
+                erroneousInfraMap.put(infraStr, logDownloadPath);
+            }
+        }
+        return erroneousInfraMap;
     }
 }

@@ -789,6 +789,11 @@ public class TestReportEngine {
         report.put(PRODUCT_NAME_TEMPLATE_KEY, product.getName());
         report.put(GIT_BUILD_DETAILS_TEMPLATE_KEY, emailReportProcessor.getGitBuildDetails(product, testPlans));
         report.put("testedInfrastructures", testedInfrastructures);
+        try {
+            report.put("failedInfrastructures", emailReportProcessor.getErroneousInfrastructures(testPlans));
+        } catch (TestGridDAOException e) {
+            throw new ReportingException("Error occurred while getting failed infrastructures");
+        }
         report.put(PRODUCT_STATUS_TEMPLATE_KEY, emailReportProcessor.getProductStatus(product).toString());
         report.put(PER_TEST_PLAN_TEMPLATE_KEY, emailReportProcessor.generatePerTestPlanSection(product, testPlans));
         report.put("testCaseInfraSummaryTable", testCaseInfraSummaryMap.entrySet());
@@ -908,6 +913,12 @@ public class TestReportEngine {
         results.put(PRODUCT_NAME_TEMPLATE_KEY, product.getName());
         results.put(GIT_BUILD_DETAILS_TEMPLATE_KEY, emailReportProcessor.getGitBuildDetails(product, testPlans));
         results.put("testedInfrastructures", testedInfrastructures);
+        try {
+            results.put("failedInfrastructures", emailReportProcessor
+                    .getErroneousInfrastructures(testPlans).entrySet());
+        } catch (TestGridDAOException e) {
+            throw new ReportingException("Error occurred while getting failed infrastructures");
+        }
         results.put(PRODUCT_STATUS_TEMPLATE_KEY, emailReportProcessor.getProductStatus(product).toString());
         results.put(SUMMARY_CHART_TEMPLATE_KEY, summaryChartURL);
         results.put(HISTORY_CHART_TEMPLATE_KEY, historyChartURL);
