@@ -463,6 +463,10 @@ Resources:
         FromPort: 8743
         ToPort: 8743
         CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 9943
+        ToPort: 9943
+        CidrIp: 0.0.0.0/0
   WSO2EnvDBSecurityGroup:
       Type: 'AWS::EC2::SecurityGroup'
       Properties:
@@ -918,7 +922,32 @@ Resources:
       UnhealthyThresholdCount: 3
       VpcId:
         Ref: WSO2EnvVPC
-
+  WSO2EnvALBTargetGroup5:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckProtocol: HTTPS
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 4
+      HealthCheckPath: /carbon/admin/login.jsp
+      HealthCheckPort: 9943
+      Matcher:
+        HttpCode: 200
+      Port: 9943
+      Protocol: HTTPS
+      TargetGroupAttributes:
+      - Key: deregistration_delay.timeout_seconds
+        Value: '20'
+      - Key: stickiness.enabled
+        Value: 'true'
+      Targets:
+      - Id: !If [IsUnix, !Ref WSO2UnixInstance1, !If [IsWindows, !Ref WSO2WindowsInstance1, !Ref 'AWS::NoValue']]
+        Port: 9943
+      - Id: !If [IsUnix, !Ref WSO2UnixInstance2, !If [IsWindows, !Ref WSO2WindowsInstance2, !Ref 'AWS::NoValue']]
+        Port: 9943
+      UnhealthyThresholdCount: 3
+      VpcId:
+        Ref: WSO2EnvVPC
   WSO2EnvALBListener1:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -961,6 +990,18 @@ Resources:
       LoadBalancerArn: !Ref WSO2EnvApplicationLoadBalancer
       Port: 80
       Protocol: HTTP
+  WSO2EnvALBListener5:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref WSO2EnvALBTargetGroup5
+      Certificates:
+        - CertificateArn: !Ref ALBCertificateARN
+      LoadBalancerArn: !Ref WSO2EnvApplicationLoadBalancer
+      Port: 9943
+      Protocol: HTTPS
+      SslPolicy: ELBSecurityPolicy-TLS-1-1-2017-01
 #####################################
 # Print details of the created stack
 #####################################
