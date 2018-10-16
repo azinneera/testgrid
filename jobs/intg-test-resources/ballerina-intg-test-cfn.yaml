@@ -311,12 +311,18 @@ Resources:
 
             wget https://archive.apache.org/dist/maven/maven-3/${MavenVersion}/binaries/apache-maven-${MavenVersion}-bin.zip -OutFile "maven.zip"
             Expand-Archive maven.zip -DestinationPath c:\\testgrid\\workspace
-
             [Environment]::SetEnvironmentVariable("M2_HOME", "c:\\testgrid\\workspace\\apache-maven-${MavenVersion}", "Machine")
             [Environment]::SetEnvironmentVariable("MAVEN_HOME", "c:\\testgrid\\workspace\\apache-maven-${MavenVersion}", "Machine")
-
             $Old_Path=(Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name Path).Path
             Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value ($Old_Path += ';c:\\testgrid\\workspace\\apache-maven-${MavenVersion}\\bin') -Verbose -PassThru|fl
+
+            $NODEJS_VERSION="v8.9.4"
+            $NODEJS_FILENAME="node-$NODEJS_VERSION-x86.msi"
+            $NODEJS_URL="https://nodejs.org/dist/$NODEJS_VERSION/$NODEJS_FILENAME"
+            $NODEJS_DOWNLOAD_LOCATION="C:\"
+            wget $NODEJS_URL -OutFile $NODEJS_DOWNLOAD_LOCATION$NODEJS_FILENAME
+            msiexec /qn /l* C:\node-log.txt /i $NODEJS_DOWNLOAD_LOCATION$NODEJS_FILENAME
+
             cd C:\"Program Files"\telegraf
             curl http://169.254.169.254/latest/meta-data/instance-id -o instance_id.txt
             ${CustomUserData}
