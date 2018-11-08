@@ -120,10 +120,10 @@ public class TestNgResultsParser extends ResultParser {
      */
     @Override
     public void parseResults() throws ResultParserException {
-        final Path dataBucket = DataBucketsHelper.getOutputLocation(testScenario.getTestPlan());
+        final Path dataBucket = DataBucketsHelper.getInfraOutputLocation(testScenario.getTestPlan());
         Set<Path> inputFiles = getResultInputFiles(dataBucket);
 
-        final Path outputLocation = DataBucketsHelper.getOutputLocation(testScenario.getTestPlan());
+        final Path outputLocation = DataBucketsHelper.getInfraOutputLocation(testScenario.getTestPlan());
         logger.info("Found TEST-TestSuite.xml result files at: " + inputFiles.stream().map
                 (outputLocation::relativize).collect(Collectors.toSet()));
         for (Path resultsFile : inputFiles) {
@@ -310,7 +310,7 @@ public class TestNgResultsParser extends ResultParser {
     public void archiveResults() throws ResultParserException {
         try {
             int maxDepth = 100;
-            final Path outputLocation = DataBucketsHelper.getOutputLocation(testScenario.getTestPlan());
+            final Path outputLocation = DataBucketsHelper.getInfraOutputLocation(testScenario.getTestPlan());
             final Set<Path> archivePaths = Files.find(outputLocation, maxDepth,
                     (path, att) -> Arrays.stream(ARCHIVABLE_FILES).anyMatch(f -> f.equals
                             (path.getFileName().toString()))).collect(Collectors.toSet());

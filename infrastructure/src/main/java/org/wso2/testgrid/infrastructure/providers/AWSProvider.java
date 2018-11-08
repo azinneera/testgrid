@@ -298,7 +298,7 @@ public class AWSProvider implements InfrastructureProvider {
 
     private void persistOutputs(TestPlan testPlan, Properties deploymentInfo)
             throws TestGridInfrastructureException {
-        final Path outputLocation = DataBucketsHelper.getOutputLocation(testPlan);
+        final Path outputLocation = DataBucketsHelper.getInfraOutputLocation(testPlan);
         try (OutputStream outputStream = new FileOutputStream(
                 outputLocation.resolve(DataBucketsHelper.INFRA_OUT_FILE).toString(), true)) {
             Files.createDirectories(outputLocation);

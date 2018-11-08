@@ -89,7 +89,7 @@ public class TestNgResultsParserTest {
         URL resource = classLoader.getResource("test-grid-is-resources");
         Assert.assertNotNull(resource);
 
-        final Path outputFile = DataBucketsHelper.getOutputLocation(testPlan).resolve(SUREFIRE_REPORTS_DIR)
+        final Path outputFile = DataBucketsHelper.getInfraOutputLocation(testPlan).resolve(SUREFIRE_REPORTS_DIR)
                 .resolve(TestNgResultsParser.RESULTS_TEST_SUITE_FILE);
         copyTestngResultsXml(outputFile);
 
@@ -116,7 +116,7 @@ public class TestNgResultsParserTest {
         Assert.assertTrue(parser.isPresent());
         Assert.assertTrue(parser.get() instanceof TestNgResultsParser);
 
-        final Path outputPath = DataBucketsHelper.getOutputLocation(testPlan);
+        final Path outputPath = DataBucketsHelper.getInfraOutputLocation(testPlan);
         FileUtils.copyDirectory(testArtifactPath.resolve(SUREFIRE_REPORTS_DIR).toFile(),
                 outputPath.resolve(SUREFIRE_REPORTS_DIR).toFile());
         FileUtils.copyFile(testArtifactPath.resolve("automation.log.rename").toFile(),
