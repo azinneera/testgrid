@@ -66,12 +66,14 @@ import org.wso2.testgrid.infrastructure.InfrastructureProviderFactory;
 import org.wso2.testgrid.tinkerer.TinkererClient;
 import org.wso2.testgrid.tinkerer.TinkererClientFactory;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -122,6 +124,10 @@ public class TestPlanExecutor {
     public boolean execute(TestPlan testPlan, InfrastructureConfig infrastructureConfig)
             throws TestPlanExecutorException, TestGridDAOException {
         long startTime = System.currentTimeMillis();
+        Path infraOutFilePath = DataBucketsHelper.getOutputLocation(testPlan)
+                .resolve(DataBucketsHelper.INFRA_OUT_FILE);
+        Path deplOutFilePath = DataBucketsHelper.getOutputLocation(testPlan)
+                .resolve(DataBucketsHelper.DEPL_OUT_FILE);
 
         // Provision infrastructure
         InfrastructureProvisionResult infrastructureProvisionResult = provisionInfrastructure(infrastructureConfig,
@@ -131,6 +137,11 @@ public class TestPlanExecutor {
             GrafanaDashboardHandler dashboardSetup = new GrafanaDashboardHandler(testPlan.getId());
             dashboardSetup.initDashboard();
         }
+
+        // Append inputs from deploymentConfig in testgrid yaml to infra outputs file
+        Properties deplProperties = testPlan.getDeploymentConfig()
+                .getDeploymentPatterns().get(0).getScripts().get(0).getInputParameters();
+        persistAdditionalInputs(deplProperties, infraOutFilePath);
 
         // Create and set deployment.
         DeploymentCreationResult deploymentCreationResult = createDeployment(testPlan,
@@ -149,8 +160,42 @@ public class TestPlanExecutor {
             printSummary(testPlan, System.currentTimeMillis() - startTime);
             return false;
         }
+
+        /*
+         *  Move infrastructure.properties out of data bucket to avoid exposing to the test execution phase.
+         */
+        try {
+            Files.move(infraOutFilePath, Paths.get(testPlan.getWorkspace(), DataBucketsHelper.INFRA_OUT_FILE),
+                    StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            logger.error("Error occurred while moving " + infraOutFilePath
+                    + " to " + Paths.get(testPlan.getWorkspace()));
+        }
+        // Append inputs from scenarioConfig in testgrid yaml to deployment outputs file
+        if (testPlan.getScenarioConfig().getScripts() != null) {
+            for (Script script : testPlan.getScenarioConfig().getScripts()) {
+                if (String.valueOf(Script.Phase.EXECUTE).equalsIgnoreCase(script.getPhase().toString())) {
+                    Properties sceProperties = script.getInputParameters();
+                    persistAdditionalInputs(sceProperties, DataBucketsHelper.getOutputLocation(testPlan)
+                            .resolve(DataBucketsHelper.DEPL_OUT_FILE));
+                    break;
+                }
+            }
+        }
+
         // Run test scenarios.
         runScenarioTests(testPlan, deploymentCreationResult);
+
+        /*
+         *  Move deployment.properties out of data bucket to avoid getting uploaded to S3.
+         */
+        try {
+            Files.move(deplOutFilePath, Paths.get(testPlan.getWorkspace(), DataBucketsHelper.DEPL_OUT_FILE),
+                    StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            logger.error("Error occurred while moving " + deplOutFilePath
+                    + " to " + Paths.get(testPlan.getWorkspace()));
+        }
 
         try {
             //post test plan actions
@@ -546,6 +591,23 @@ public class TestPlanExecutor {
             os.write((TestGridConstants.KEY_FILE_LOCATION + "=" + keyFileLocation).getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             logger.error("Error while persisting infra input params to " + location, e);
+        }
+    }
+
+    /**
+     * Persist additional inputs required other than the outputs from previous steps (i.e. infra/deployment).
+     * The additional inputs are specified in the testgrid.yaml.
+     *
+     * @param properties properties to be added
+     * @param propFilePath path of the property file
+     * @throws TestPlanExecutorException if writing to the property file fails
+     */
+    private void persistAdditionalInputs(Properties properties, Path propFilePath) throws TestPlanExecutorException {
+        try (OutputStream outputStream = new FileOutputStream(
+                propFilePath.toString(), true)) {
+            properties.store(outputStream, null);
+        } catch (IOException e) {
+            throw new TestPlanExecutorException("Error occurred while writing deployment outputs.", e);
         }
     }
 

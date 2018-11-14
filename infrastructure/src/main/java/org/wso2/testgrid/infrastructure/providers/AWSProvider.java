@@ -48,7 +48,6 @@ import org.wso2.testgrid.common.TestGridConstants;
 import org.wso2.testgrid.common.TestPlan;
 import org.wso2.testgrid.common.TimeOutBuilder;
 import org.wso2.testgrid.common.config.ConfigurationContext;
-import org.wso2.testgrid.common.config.ConfigurationContext.ConfigurationProperties;
 import org.wso2.testgrid.common.config.InfrastructureConfig;
 import org.wso2.testgrid.common.config.Script;
 import org.wso2.testgrid.common.exception.TestGridInfrastructureException;
@@ -239,16 +238,7 @@ public class AWSProvider implements InfrastructureProvider {
             DescribeStacksResult describeStacksResult = cloudFormation
                     .describeStacks(describeStacksRequest);
 
-            //TODO: remove these
             List<Host> hosts = new ArrayList<>();
-            Host tomcatHost = new Host();
-            tomcatHost.setLabel("tomcatHost");
-            tomcatHost.setIp("ec2-35-171-21-194.compute-1.amazonaws.com");
-            Host tomcatPort = new Host();
-            tomcatPort.setLabel("tomcatPort");
-            tomcatPort.setIp("8080");
-            hosts.add(tomcatHost);
-            hosts.add(tomcatPort);
 
             Properties outputProps = new Properties();
             for (Stack st : describeStacksResult.getStacks()) {
@@ -264,19 +254,9 @@ public class AWSProvider implements InfrastructureProvider {
                 //Log cfn outputs
                 logger.info(outputsStr.toString() + "\n}");
             }
-
-            // add cfn input properties into the output. We sometimes use default values of cfn input params
-            // which needs to passed down to the next step.
-            for (TemplateParameter param : expectedParameters) {
-                if (param.getDefaultValue() != null) {
-                    outputProps.setProperty(param.getParameterKey(), param.getDefaultValue());
-                }
-            }
-            for (Parameter param : populatedExpectedParameters) {
-                outputProps.setProperty(param.getParameterKey(), param.getParameterValue());
-            }
-
+            //Persist infra outputs to a file to be used for the next step
             persistOutputs(testPlan, outputProps);
+
             InfrastructureProvisionResult result = new InfrastructureProvisionResult();
             //added for backward compatibility. todo remove.
             result.setHosts(hosts);
@@ -440,38 +420,6 @@ public class AWSProvider implements InfrastructureProvider {
                 }
                 Parameter awsParameter = new Parameter().withParameterKey(expected.getParameterKey()).
                         withParameterValue(customScript);
-                cfCompatibleParameters.add(awsParameter);
-            }
-
-            //Set WUM credentials
-            if (TestGridConstants.WUM_USERNAME_PROPERTY.equals(expected.getParameterKey())) {
-                Parameter awsParameter = new Parameter().withParameterKey(expected.getParameterKey()).
-                        withParameterValue(ConfigurationContext.getProperty(ConfigurationContext.
-                                ConfigurationProperties.WUM_USERNAME));
-                cfCompatibleParameters.add(awsParameter);
-            }
-
-            if (TestGridConstants.WUM_PASSWORD_PROPERTY.equals(expected.getParameterKey())) {
-                Parameter awsParameter = new Parameter().withParameterKey(expected.getParameterKey()).
-                        withParameterValue(ConfigurationContext.getProperty(ConfigurationContext.
-                                ConfigurationProperties.WUM_PASSWORD));
-                cfCompatibleParameters.add(awsParameter);
-            }
-
-            //Set AWS credentials for clustering
-            if (String.valueOf(ConfigurationProperties.AWS_ACCESS_KEY_ID_CLUSTERING)
-                    .equals(expected.getParameterKey())) {
-                Parameter awsParameter = new Parameter().withParameterKey(expected.getParameterKey()).
-                        withParameterValue(ConfigurationContext.getProperty(
-                                ConfigurationProperties.AWS_ACCESS_KEY_ID_CLUSTERING));
-                cfCompatibleParameters.add(awsParameter);
-            }
-
-            if (String.valueOf(ConfigurationProperties.AWS_ACCESS_KEY_SECRET_CLUSTERING)
-                    .equals(expected.getParameterKey())) {
-                Parameter awsParameter = new Parameter().withParameterKey(expected.getParameterKey()).
-                        withParameterValue(ConfigurationContext.getProperty(
-                                ConfigurationProperties.AWS_ACCESS_KEY_SECRET_CLUSTERING));
                 cfCompatibleParameters.add(awsParameter);
             }
         }));

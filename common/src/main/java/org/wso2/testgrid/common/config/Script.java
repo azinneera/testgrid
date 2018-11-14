@@ -101,6 +101,11 @@ public class Script implements Serializable, Cloneable {
         DEPLOY("Deploy"),
 
         /**
+         * Defines the test execution shell script type.
+         */
+        EXECUTE("Execute"),
+
+        /**
          * Defines the destroy-infra shell script type.
          */
         DESTROY("Destroy");
